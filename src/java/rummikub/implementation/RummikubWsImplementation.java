@@ -3,9 +3,15 @@
  */
 
 package rummikub.implementation;
+import com.sun.xml.xsom.impl.scd.Iterators;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Timer;
 import rummikub.gameLogic.model.gameobjects.Board;
 import rummikub.gameLogic.model.logic.GameLogic;
 import rummikub.gameLogic.model.logic.PlayersMove;
@@ -24,6 +30,7 @@ public class RummikubWsImplementation {
     private static final boolean WITH_TILE_LIST = true;
     private static final boolean LOADED_FROM_XML = true;
     private static int INDEX_NORMALIZATION = 1;
+    //private static int TIME = 1;
 
     
     //private members:
@@ -35,7 +42,8 @@ public class RummikubWsImplementation {
     private PlayersMove currentPlayerMove;
     
     //Server related members
-    private ArrayList<PlayerDetails> playerDetailesList;
+    //private ArrayList<PlayerDetails> playerDetailesList;
+    private HashMap<PlayerId,PlayerDetails> playerDetailes;
     private GameStatus gameStatus;
     private boolean isLoadedFromXML;
     private ArrayList<Event> gameEventList;
@@ -54,7 +62,8 @@ public class RummikubWsImplementation {
         this.serieGenerator = new SeriesGenerator();
         this.newMoveGenerator = new ComputerSingleMoveGenerator();
         
-        this.playerDetailesList = new ArrayList<>();
+        //this.playerDetailesList = new ArrayList<>();
+        this.playerDetailes = new HashMap<>();
         this.gameStatus = GameStatus.WAITING;
         this.isLoadedFromXML = isLoadedFromXML;
         this.gameEventList = new ArrayList<>();
@@ -64,13 +73,30 @@ public class RummikubWsImplementation {
 
     //********** Public functions used by the Web Service - START **********/
 
-    //TODO
+    //DONE - maybe still things to add if i understood wrong the instructions - releated to TIMER
     public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
-        List<Event> eventsList = new ArrayList<>();
+        validateParamsAndThrowExceptionInIlegalCase(playerId, eventId);
+        
+        List<Event> eventsList;
+        int indexOfLastEvent = indexOfLastEvent();
 
+        if(eventId == 0) {
+            eventsList = this.gameEventList;
+        }
+        else if(indexOfLastEvent == eventId) {
+            eventsList = new ArrayList<>();
+        }
+        else { 
+            eventsList = new ArrayList<>(this.gameEventList.subList(eventId + 1, indexOfLastEvent));
+        }
         
-        //throw new InvalidParameters_Exception(null, null);
-        
+//        if (hasEventThatNeedUserInput(eventsList)) {
+//            //Timer timer = new Timer();
+//        }
+//        else {
+//            
+//        }
+
         return eventsList;
     }
 
@@ -79,18 +105,24 @@ public class RummikubWsImplementation {
                                                            InvalidParameters_Exception, 
                                                            InvalidXML_Exception {
         String result = "";
+        
+        //TODO - finish func
+        validateParamsAndThrowExceptionInIlegalCaseOfLoadingGameFromXML(xmlData);
         //throw new DuplicateGameName_Exception(null, null);
         //throw new InvalidParameters_Exception("TEST", null);
         //throw new InvalidXML_Exception(null, null);
+        
         
         return result;
     }
     
     //DONE
     public List<PlayerDetails> getPlayersDetails(String gameName) throws GameDoesNotExists_Exception {
-        List<PlayerDetails> playerDetailsList;
         
         validateParamsAndThrowExceptionInIlegalCase(gameName);
+
+        List<PlayerDetails> playerDetailsList;
+        
         playerDetailsList = makePlayerDetailsListWithoutTilesList();
 
         return playerDetailsList;
@@ -112,10 +144,10 @@ public class RummikubWsImplementation {
     
     //DONE
     public GameDetails getGameDetails(String gameName) throws GameDoesNotExists_Exception {
+        validateParamsAndThrowExceptionInIlegalCase(gameName);
+        
         GameDetails currentGameDetals = new GameDetails();
         Settings currGameSetings = this.rummikubLogic.getGameSettings();
-        
-        validateParamsAndThrowExceptionInIlegalCase(gameName);
         
         currentGameDetals.setComputerizedPlayers(currGameSetings.getNumOfCpuPlayers());
         currentGameDetals.setHumanPlayers(currGameSetings.getNumOfHumanPlayers());
@@ -147,41 +179,56 @@ public class RummikubWsImplementation {
     //DONE
     public int joinGame(String gameName, String playerName) throws GameDoesNotExists_Exception, 
                                                                    InvalidParameters_Exception {
-        int playerId, indexOfPlayerInHisGame;
-        Player newPlayer;
-
         validateParamsAndThrowExceptionInIlegalCase(gameName, playerName);
+        
+        Player newPlayer;
+        int playerId;
+        //before change playerDetails from list to map
+        //int indexOfPlayerInHisGame;
+        
         newPlayer = new HumanPlayer(gameName);
         this.rummikubLogic.addNewHumanPlayer(newPlayer);
-        indexOfPlayerInHisGame = this.rummikubLogic.getPlayers().size() - INDEX_NORMALIZATION;
-        playerId = PlayerId.getPlayerId(playerName, gameName, indexOfPlayerInHisGame);
-        addPlayerToPlayerDetailesList(newPlayer, PlayerStatus.JOINED, WITH_TILE_LIST);
-        
+
+        //before change playerDetails from list to map
+
+        //indexOfPlayerInHisGame = indexOfLastEvent();
+        //playerId = PlayerId.getPlayerId(playerName, gameName, indexOfPlayerInHisGame);
+
+        playerId = addPlayerToPlayerDetailesList(newPlayer, PlayerStatus.JOINED, WITH_TILE_LIST);
+
         //finish wrtining that method
         updateGameStatus();
         
         return playerId;
-
     }
 
-    //TODO
+    //DONE
     public PlayerDetails getPlayerDetails(int playerId) throws GameDoesNotExists_Exception, 
                                                                InvalidParameters_Exception {
-       PlayerDetails currentPlayerDetails = new PlayerDetails();
         
-        validateParamsAndThrowExceptionInIlegalCase(playerId);
+        validateParamsAndThrowExceptionGameNotExsistsOrInvalidParams(playerId);
 
-        //throw new GameDoesNotExists_Exception(null, null);
-        //throw new InvalidParameters_Exception(null, null);
-
-        return currentPlayerDetails;
+        return findPlayerByPlayerId(playerId);
     }
 
     //TODO
     public void createSequence(int playerId, List<ws.rummikub.Tile> tiles) throws InvalidParameters_Exception {
 
+        //TODO - finish writing that method - validation of tiles list
+        validateParamsAndThrowExceptionInIlegalCase(playerId, tiles);
+
+        Event newSequenceCtearedEvent = new Event();
+        this.gameEventList.add(newSequenceCtearedEvent);
         
-        throw new InvalidParameters_Exception(null, null);
+        newSequenceCtearedEvent.setId(indexOfLastEvent());
+        newSequenceCtearedEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //newSequenceCtearedEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //newSequenceCtearedEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        //newSequenceCtearedEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //newSequenceCtearedEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        newSequenceCtearedEvent.setType(EventType.SEQUENCE_CREATED);
+        
+        //TODO - FINISH WRTITING ADDING NEW SERIE LOGIC
     }
 
     //TODO
@@ -189,14 +236,41 @@ public class RummikubWsImplementation {
                                                             throws InvalidParameters_Exception {
         
 
-        throw new InvalidParameters_Exception(null, null);
+        //TODO - finish writing that method
+        validateParamsAndThrowExceptionInIlegalCase(playerId, tile, sequenceIndex, sequencePosition);
+
+        Event addTileEvent = new Event();
+        this.gameEventList.add(addTileEvent);
+        
+        addTileEvent.setId(indexOfLastEvent());
+        addTileEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //addTileEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //addTileEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        addTileEvent.setTargetSequenceIndex(sequenceIndex);
+        addTileEvent.setTargetSequencePosition(sequencePosition);
+        addTileEvent.setType(EventType.TILE_ADDED);
+        
+        //TODO - FINISH WRTITING LOGIC
     }
     
     //TODO
     public void takeBackTile(int playerId, int sequenceIndex, int sequencePosition) 
                                                             throws InvalidParameters_Exception {
+        //TODO - finish writing that method
+        validateParamsAndThrowExceptionInIlegalCase(playerId, sequenceIndex, sequencePosition);
 
-        throw new InvalidParameters_Exception(null, null);
+        Event takeTileBackEvent = new Event();
+        this.gameEventList.add(takeTileBackEvent);
+        
+        takeTileBackEvent.setId(indexOfLastEvent());
+        takeTileBackEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        takeTileBackEvent.setSourceSequenceIndex(sequenceIndex);
+        takeTileBackEvent.setSourceSequencePosition(sequencePosition);
+        //takeTileBackEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //takeTileBackEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        takeTileBackEvent.setType(EventType.TILE_RETURNED);
+
+        //TODO - FINISH WRTITING LOGIC
     }
 
     //TODO
@@ -204,21 +278,59 @@ public class RummikubWsImplementation {
                          int sourceSequencePosition, int targetSequenceIndex, 
                          int targetSequencePosition) throws InvalidParameters_Exception {
         
+        //TODO - finish writing that method
+        validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+
+        Event tileMovedEvent = new Event();
+        this.gameEventList.add(tileMovedEvent);
         
-        throw new InvalidParameters_Exception(null, null);
+        tileMovedEvent.setId(indexOfLastEvent());
+        tileMovedEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        tileMovedEvent.setSourceSequenceIndex(sourceSequenceIndex);
+        tileMovedEvent.setSourceSequencePosition(sourceSequencePosition);
+        tileMovedEvent.setTargetSequenceIndex(targetSequenceIndex);
+        tileMovedEvent.setTargetSequencePosition(targetSequencePosition);
+        tileMovedEvent.setType(EventType.TILE_MOVED);
+
+        //TODO - FINISH WRTITING LOGIC
     }
 
     //TODO
     public void finishTurn(int playerId) throws InvalidParameters_Exception {
 
+        validateParamsAndThrowExceptionInIlegalCase(playerId);
         
-        throw new InvalidParameters_Exception(null, null);
+        Event finishTurnEvent = new Event();
+        this.gameEventList.add(finishTurnEvent);
+        
+        finishTurnEvent.setId(indexOfLastEvent());
+        finishTurnEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //finishTurnEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //finishTurnEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        //finishTurnEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //finishTurnEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        finishTurnEvent.setType(EventType.PLAYER_FINISHED_TURN);
+
+        //TODO - FINISH WRTITING LOGIC
     }
 
     //TODO
     public void resign(int playerId) throws InvalidParameters_Exception {
        
-        throw new InvalidParameters_Exception(null, null);
+        validateParamsAndThrowExceptionInIlegalCase(playerId);
+        
+        Event resignEvent = new Event();
+        this.gameEventList.add(resignEvent);
+        
+        resignEvent.setId(indexOfLastEvent());
+        resignEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //resignEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //resignEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        //resignEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //resignEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        resignEvent.setType(EventType.PLAYER_RESIGNED);
+        
+        //TODO - FINISH WRTITING LOGIC
     }
     
     //********** Public functions used by the Web Service - END **********/
@@ -261,14 +373,42 @@ public class RummikubWsImplementation {
     private void validateParamsAndThrowExceptionInIlegalCase(String gameName, String playerName) throws GameDoesNotExists_Exception, 
                                                                                                         InvalidParameters_Exception {
         checkCaseOfGameDoesNotExists(gameName);
-        checkCaseOfPlayerNameAlreadyExsists(playerName);
+        checkCaseOfPlayerAlreadyExsists(playerName);
         checkCaseOfGameStatusIsNotWaiting(gameName);
     }
 
-    private void validateParamsAndThrowExceptionInIlegalCase(int playerId) throws GameDoesNotExists_Exception, 
+    private void validateParamsAndThrowExceptionGameNotExsistsOrInvalidParams(int playerId) throws GameDoesNotExists_Exception, 
                                                                                   InvalidParameters_Exception {
+        checkCaseOfPlayerNotExsists(playerId);
         checkCaseOfGameDoesNotExists(playerId);
-        checkCaseOfPlayerNameAlreadyExsists(playerId);
+    }
+
+    private void validateParamsAndThrowExceptionInIlegalCase(int playerId) throws InvalidParameters_Exception {
+        checkCaseOfPlayerNotExsists(playerId);
+    }
+    
+    private void validateParamsAndThrowExceptionInIlegalCase(int playerId, int eventId) throws InvalidParameters_Exception {
+        checkCaseOfPlayerNotExsists(playerId);
+        checkCaseOfIlegalEventId(eventId);
+    } 
+    
+    private void validateParamsAndThrowExceptionInIlegalCase(int playerId, List<ws.rummikub.Tile> tiles) throws InvalidParameters_Exception {
+        checkCaseOfPlayerNotExsists(playerId);
+        checkCaseOfIlegalTileList(tiles);
+    }
+    
+    private void validateParamsAndThrowExceptionInIlegalCase(int playerId, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
+        checkCaseOfPlayerNotExsists(playerId);
+    }
+    
+    private void validateParamsAndThrowExceptionInIlegalCase(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
+        checkCaseOfPlayerNotExsists(playerId);
+    }
+        
+    private void validateParamsAndThrowExceptionInIlegalCase(int playerId, int sourceSequenceIndex, 
+                                                             int sourceSequencePosition, int targetSequenceIndex, 
+                                                             int targetSequencePosition) throws InvalidParameters_Exception {
+        checkCaseOfPlayerNotExsists(playerId);
     }
     
     private void checkCaseOfDuplicateGameName(String gameName) throws DuplicateGameName_Exception {
@@ -303,21 +443,21 @@ public class RummikubWsImplementation {
     
     private void checkCaseOfGameDoesNotExists(int playerId) throws GameDoesNotExists_Exception {
 
-//        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(gameName); 
-//             
-//        if (!isGameNameAlreadyExsists(gameName)) {
-//            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
-//            RummikubFault rummikubFualt = new RummikubFault();
-//
-//            rummikubFualt.setFaultCode(null);
-//            rummikubFualt.setFaultString("name not exsists");
-//            gameDoesNotExsists.setFaultInfo(rummikubFualt);
-//            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.GAME_NAME_NOT_EXSIST);
-//            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.GAME_NAME_NOT_EXSIST, gameDoesNotExsists);
-//        }
+        PlayerDetails playerDetails = findPlayerByPlayerId(playerId);
+        
+        if (playerDetails == null) {
+            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
+            RummikubFault rummikubFualt = new RummikubFault();
+
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("player id not exsists");
+            gameDoesNotExsists.setFaultInfo(rummikubFualt);
+            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS);
+            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS, gameDoesNotExsists);
+        }
     }
     
-    private void checkCaseOfPlayerNameAlreadyExsists(String playerName) throws InvalidParameters_Exception {
+    private void checkCaseOfPlayerAlreadyExsists(String playerName) throws InvalidParameters_Exception {
         
         checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters(playerName);
         
@@ -350,37 +490,23 @@ public class RummikubWsImplementation {
         }
     }
      
-    private void checkCaseOfPlayerNameAlreadyExsists(int playerId) throws InvalidParameters_Exception {
+    private void checkCaseOfPlayerNotExsists(int playerId) throws InvalidParameters_Exception {
         
-//        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters(playerName);
-//        
-//        if (this.isLoadedFromXML) {
-//            if (!this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName)) {
-//                InvalidParameters invalidParameters = new InvalidParameters();
-//                RummikubFault rummikubFualt = new RummikubFault();
-//
-//                rummikubFualt.setFaultCode(null);
-//                rummikubFualt.setFaultString("For a loaded game such player not exsists");
-//                invalidParameters.setFaultInfo(rummikubFualt);
-//                invalidParameters.setMessage(Utils.Constants.ErrorMessages.PLAYER_NAME_NOT_EXSISTS_IN_XML_LOADED_GAME);
-//
-//                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.PLAYER_NAME_NOT_EXSISTS_IN_XML_LOADED_GAME,
-//                        invalidParameters);
-//            }
-//        }
-//        else {
-//            if (this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName)) {
-//                InvalidParameters invalidParameters = new InvalidParameters();
-//                RummikubFault rummikubFualt = new RummikubFault();
-//
-//                rummikubFualt.setFaultCode(null);
-//                rummikubFualt.setFaultString("There is already a player with same name");
-//                invalidParameters.setFaultInfo(rummikubFualt);
-//                invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_PLAYER_NAME);
-//
-//                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_PLAYER_NAME, invalidParameters);
-//            }    
-//        }
+        PlayerDetails playerDetails = findPlayerByPlayerId(playerId);
+        
+        if (playerDetails == null) {
+            InvalidParameters invalidParameters = new InvalidParameters();
+            RummikubFault rummikubFualt = new RummikubFault();
+
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("player id not exsists");
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS);
+
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS,
+                    invalidParameters);
+
+        }
     }
     
     private void checkCaseOfGameStatusIsNotWaiting(String gameName) throws InvalidParameters_Exception {
@@ -395,6 +521,30 @@ public class RummikubWsImplementation {
             invalidParameters.setMessage(Utils.Constants.ErrorMessages.GAME_NOT_IN_WAITING_STATUS);
             
             throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.GAME_NOT_IN_WAITING_STATUS,
+                                                  invalidParameters);
+        }
+    }
+    
+    private void checkCaseOfIlegalEventId(int eventId) throws InvalidParameters_Exception {
+        InvalidParameters invalidParameters = new InvalidParameters();
+        RummikubFault rummikubFualt = new RummikubFault();
+
+        if (isNegativeNumber(eventId)) {
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("negative event id passed");
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_EVENT_ID);
+            
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_EVENT_ID, invalidParameters);
+        }
+        
+        if (indexOfLastEvent() < eventId) {
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("the event id the passed is bigger then the exisiting event list and therefore not exsists");
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.EVENT_ID_NOT_EXSISTS);
+            
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.EVENT_ID_NOT_EXSISTS,
                                                   invalidParameters);
         }
     }
@@ -500,14 +650,37 @@ public class RummikubWsImplementation {
         }
     }
     
+    //    USED WHEN THE MEMBER "this.playerDetailesList" is ArrayList type
+//
+//    private void addPlayerToPlayerDetailesList(Player currPlayer) {
+//        PlayerDetails playerDetails = createPlayerDetailes(currPlayer, PlayerStatus.JOINED, WITH_TILE_LIST);
+//        this.playerDetailesList.add(playerDetails);
+//    }
+//    
+//    private void addPlayerToPlayerDetailesList(Player currPlayer, PlayerStatus playerStatus, boolean withTilesList) {
+//        PlayerDetails playerDetails = createPlayerDetailes(currPlayer, playerStatus, withTilesList);
+//        this.playerDetailesList.add(playerDetails);
+//    }
+//****************************
+    
     private void addPlayerToPlayerDetailesList(Player currPlayer) {
         PlayerDetails playerDetails = createPlayerDetailes(currPlayer, PlayerStatus.JOINED, WITH_TILE_LIST);
-        this.playerDetailesList.add(playerDetails);
+        int indexOfPlayerInHisGame = this.rummikubLogic.getPlayers().isEmpty()? 
+                                     0 : this.rummikubLogic.getPlayers().size() - INDEX_NORMALIZATION;
+        PlayerId newPlayerId = new PlayerId(currPlayer.getName(), this.rummikubLogic.getGameSettings().getGameName(),
+                                            indexOfPlayerInHisGame);
+        this.playerDetailes.put(newPlayerId, playerDetails);
     }
     
-    private void addPlayerToPlayerDetailesList(Player currPlayer, PlayerStatus playerStatus, boolean withTilesList) {
+    private int addPlayerToPlayerDetailesList(Player currPlayer, PlayerStatus playerStatus, boolean withTilesList) {
         PlayerDetails playerDetails = createPlayerDetailes(currPlayer, playerStatus, withTilesList);
-        this.playerDetailesList.add(playerDetails);
+        int indexOfPlayerInHisGame = this.rummikubLogic.getPlayers().isEmpty()? 
+                                     0 : this.rummikubLogic.getPlayers().size() - INDEX_NORMALIZATION;
+        PlayerId newPlayerId = new PlayerId(currPlayer.getName(), this.rummikubLogic.getGameSettings().getGameName(),
+                                            indexOfPlayerInHisGame);
+        this.playerDetailes.put(newPlayerId, playerDetails);
+        
+        return newPlayerId.getPlayerId();
     }
     
 //    USED WHEN THE MEMBER "this.playerDetailesList" **NOT** EXSISTS
@@ -571,17 +744,30 @@ public class RummikubWsImplementation {
         }
     }
     
-    private List<PlayerDetails> makePlayerDetailsListWithoutTilesList() {
-        List<PlayerDetails> playerDetailsList = new ArrayList<>();
+    //    USED WHEN THE MEMBER "this.playerDetailesList" is ArrayList type
 
-        for (PlayerDetails playerDetails : this.playerDetailesList) {
+//    private List<PlayerDetails> makePlayerDetailsListWithoutTilesList() {
+//        List<PlayerDetails> playerDetailsList = new ArrayList<>();
+//
+//        for (PlayerDetails playerDetails : this.playerDetailesList) {
+//            PlayerDetails newPlayerDetails = copyPlayerDetails(playerDetails, !WITH_TILE_LIST);
+//            playerDetailsList.add(newPlayerDetails);
+//        }
+//        
+//        return playerDetailsList;
+//    }
+
+    private List<PlayerDetails> makePlayerDetailsListWithoutTilesList() {
+        List<PlayerDetails> newPlayerDetailsList = new ArrayList<>();
+
+        for (PlayerDetails playerDetails : this.playerDetailes.values()) {
             PlayerDetails newPlayerDetails = copyPlayerDetails(playerDetails, !WITH_TILE_LIST);
-            playerDetailsList.add(newPlayerDetails);
+            newPlayerDetailsList.add(newPlayerDetails);
         }
         
-        return playerDetailsList;
+        return newPlayerDetailsList;
     }
-    
+
     private PlayerDetails copyPlayerDetails(PlayerDetails playerDetailsToCopy, boolean withTilesList) {
         PlayerDetails playerDetails = new PlayerDetails();
 
@@ -611,11 +797,59 @@ public class RummikubWsImplementation {
             this.gameStatus = GameStatus.ACTIVE;
 
             //walk throw details list and set status to active????
-            for (PlayerDetails playerDetailes : this.playerDetailesList) {
-                playerDetailes.setStatus(PlayerStatus.ACTIVE);
+            for (PlayerDetails currPlayerDetailes : this.playerDetailes.values()) {
+                currPlayerDetailes.setStatus(PlayerStatus.ACTIVE);
             }
+            
+            //walk throw details list and set status to active????
+//            for (PlayerDetails playerDetailes : this.playerDetailesList) {
+//                playerDetailes.setStatus(PlayerStatus.ACTIVE);
+//            }
+
+            initCurrentPlayerMove();
+            
+
+            Event takeTileBackEvent = new Event();
+            this.gameEventList.add(takeTileBackEvent);
+
+            takeTileBackEvent.setId(indexOfLastEvent());
+            //takeTileBackEvent.setPlayerName(findPlayerByPlayerId(playerId).getName(/*MAYBE NOT NEED THAT SET*/null));
+            //takeTileBackEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+            //takeTileBackEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+            //takeTileBackEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+            //takeTileBackEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+            takeTileBackEvent.setType(EventType.GAME_START);
         }
     }
+
+    private PlayerDetails findPlayerByPlayerId(int playerId) {
+        boolean found = false;
+        PlayerDetails playerDetails = null;
+        
+        for (Iterator<PlayerId> iterator = this.playerDetailes.keySet().iterator(); !found && iterator.hasNext();) {
+            PlayerId currPlayerId = iterator.next();
+            
+            found = currPlayerId.getPlayerId() == playerId;
+            if(found) {
+                playerDetails = this.playerDetailes.get(currPlayerId); 
+            }
+        }
+        
+        return playerDetails;
+    }
+    
+    int indexOfLastEvent() {
+        return this.gameEventList.isEmpty()? 0 : this.gameEventList.size() - INDEX_NORMALIZATION;
+    }
+
+    private void checkCaseOfIlegalTileList(List<ws.rummikub.Tile>  tiles) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void validateParamsAndThrowExceptionInIlegalCaseOfLoadingGameFromXML(String xmlData) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
 
 // <editor-fold defaultstate="collapsed" desc="user-description">

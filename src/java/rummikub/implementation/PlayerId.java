@@ -15,12 +15,18 @@ public class PlayerId {
   
     private final String playerName;
     private final String gameName;
-    private int indexOfPlayerInHisGame;
+    private final int indexOfPlayerInHisGame;
+    private final int playerId;
 
     public PlayerId(String playerName, String gameName, int indexOfPlayerInHisGame) {
         this.playerName = playerName;
         this.gameName = gameName;
         this.indexOfPlayerInHisGame = indexOfPlayerInHisGame;
+        this.playerId = generatePlayerId();
+    }
+    
+    private int generatePlayerId() {
+        return hashCode();
     }
 
     @Override
@@ -54,12 +60,16 @@ public class PlayerId {
     }
     
     public int getPlayerId() {
-        return this.hashCode();
+        return this.playerId;
     }
     
-    public static int getPlayerId(String playerName, String gameName, int indexOfPlayerInHisGame) {
-        PlayerId playerId = new PlayerId(playerName, gameName, indexOfPlayerInHisGame);
-        return playerId.hashCode();
+    public String getPlayerName() {
+        return this.playerName;
     }
+//    
+//    public static int getPlayerId(String playerName, String gameName, int indexOfPlayerInHisGame) {
+//        PlayerId playerId = new PlayerId(playerName, gameName, indexOfPlayerInHisGame);
+//        return playerId.hashCode();
+//    }
     
 }
