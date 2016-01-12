@@ -78,7 +78,6 @@ public class Tile implements Comparable<Tile> {
                     return curr;
                 }
             }
-
             return null;
         }
     }

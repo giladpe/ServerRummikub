@@ -4,6 +4,7 @@
 
 package rummikub.implementation;
 import com.sun.xml.xsom.impl.scd.Iterators;
+import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import rummikub.gameLogic.controller.rummikub.SingleMove;
 import rummikub.gameLogic.model.gameobjects.Board;
+import rummikub.gameLogic.model.gameobjects.Serie;
 import rummikub.gameLogic.model.logic.GameLogic;
 import rummikub.gameLogic.model.logic.PlayersMove;
 import rummikub.gameLogic.model.logic.SeriesGenerator;
@@ -30,6 +33,8 @@ public class RummikubWsImplementation {
     private static final boolean WITH_TILE_LIST = true;
     private static final boolean LOADED_FROM_XML = true;
     private static int INDEX_NORMALIZATION = 1;
+    private static final int START_OF_THE_SERIES = 0;
+
     //private static int TIME = 1;
 
     
@@ -106,11 +111,9 @@ public class RummikubWsImplementation {
                                                            InvalidXML_Exception {
         String result = "";
         
-        //TODO - finish func
+        //TODO - finish wrting the function
         validateParamsAndThrowExceptionInIlegalCaseOfLoadingGameFromXML(xmlData);
-        //throw new DuplicateGameName_Exception(null, null);
-        //throw new InvalidParameters_Exception("TEST", null);
-        //throw new InvalidXML_Exception(null, null);
+
         
         
         return result;
@@ -217,40 +220,40 @@ public class RummikubWsImplementation {
         //TODO - finish writing that method - validation of tiles list
         validateParamsAndThrowExceptionInIlegalCase(playerId, tiles);
 
-        Event newSequenceCtearedEvent = new Event();
-        this.gameEventList.add(newSequenceCtearedEvent);
-        
-        newSequenceCtearedEvent.setId(indexOfLastEvent());
-        newSequenceCtearedEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
-        //newSequenceCtearedEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //newSequenceCtearedEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        //newSequenceCtearedEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //newSequenceCtearedEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        newSequenceCtearedEvent.setType(EventType.SEQUENCE_CREATED);
+        addCreateSequenceEvent(playerId, tiles);
         
         //TODO - FINISH WRTITING ADDING NEW SERIE LOGIC
     }
 
     //TODO
     public void addTile(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) 
-                                                            throws InvalidParameters_Exception {
+                                                                      throws InvalidParameters_Exception {
         
-
         //TODO - finish writing that method
         validateParamsAndThrowExceptionInIlegalCase(playerId, tile, sequenceIndex, sequencePosition);
-
-        Event addTileEvent = new Event();
-        this.gameEventList.add(addTileEvent);
+        //we know the params are VALID
         
-        addTileEvent.setId(indexOfLastEvent());
-        addTileEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
-        //addTileEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //addTileEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        addTileEvent.setTargetSequenceIndex(sequenceIndex);
-        addTileEvent.setTargetSequencePosition(sequencePosition);
-        addTileEvent.setType(EventType.TILE_ADDED);
+        Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex);
+        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie() - INDEX_NORMALIZATION;
         
         //TODO - FINISH WRTITING LOGIC
+        addTileaddedEvent(playerId, tile, sequenceIndex, sequencePosition);
+        
+        if(sequencePosition > START_OF_THE_SERIES && sequencePosition < END_OF_THE_SERIES ) {
+            
+        }
+        
+        Point target = new Point(sequenceIndex, sequencePosition);
+        Tile logicalTile = getLogicalTile(tile);
+       
+        int IndexInHand = this.currentPlayerMove.getHandAfterMove().indexOf(logicalTile);
+        SingleMove singleMove = new SingleMove(target, IndexInHand, SingleMove.MoveType.HAND_TO_BOARD);
+        
+        if (dealWithSingleMoveResualt(singleMove)) {
+            PlayerDetails playerDetails = findPlayerByPlayerId(playerId);
+            playerDetails.getTiles().remove(IndexInHand);
+        }
+        // make single move - if it is legal - need to update player details tile list (function to do it)
     }
     
     //TODO
@@ -259,17 +262,8 @@ public class RummikubWsImplementation {
         //TODO - finish writing that method
         validateParamsAndThrowExceptionInIlegalCase(playerId, sequenceIndex, sequencePosition);
 
-        Event takeTileBackEvent = new Event();
-        this.gameEventList.add(takeTileBackEvent);
+        addTakeBackTileEvent(playerId, sequenceIndex, sequencePosition);
         
-        takeTileBackEvent.setId(indexOfLastEvent());
-        takeTileBackEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
-        takeTileBackEvent.setSourceSequenceIndex(sequenceIndex);
-        takeTileBackEvent.setSourceSequencePosition(sequencePosition);
-        //takeTileBackEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //takeTileBackEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        takeTileBackEvent.setType(EventType.TILE_RETURNED);
-
         //TODO - FINISH WRTITING LOGIC
     }
 
@@ -280,17 +274,7 @@ public class RummikubWsImplementation {
         
         //TODO - finish writing that method
         validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
-
-        Event tileMovedEvent = new Event();
-        this.gameEventList.add(tileMovedEvent);
-        
-        tileMovedEvent.setId(indexOfLastEvent());
-        tileMovedEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
-        tileMovedEvent.setSourceSequenceIndex(sourceSequenceIndex);
-        tileMovedEvent.setSourceSequencePosition(sourceSequencePosition);
-        tileMovedEvent.setTargetSequenceIndex(targetSequenceIndex);
-        tileMovedEvent.setTargetSequencePosition(targetSequencePosition);
-        tileMovedEvent.setType(EventType.TILE_MOVED);
+        addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
 
         //TODO - FINISH WRTITING LOGIC
     }
@@ -300,16 +284,7 @@ public class RummikubWsImplementation {
 
         validateParamsAndThrowExceptionInIlegalCase(playerId);
         
-        Event finishTurnEvent = new Event();
-        this.gameEventList.add(finishTurnEvent);
-        
-        finishTurnEvent.setId(indexOfLastEvent());
-        finishTurnEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
-        //finishTurnEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //finishTurnEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        //finishTurnEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //finishTurnEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        finishTurnEvent.setType(EventType.PLAYER_FINISHED_TURN);
+        addFinishTurnEvent(playerId);
 
         //TODO - FINISH WRTITING LOGIC
     }
@@ -318,18 +293,9 @@ public class RummikubWsImplementation {
     public void resign(int playerId) throws InvalidParameters_Exception {
        
         validateParamsAndThrowExceptionInIlegalCase(playerId);
-        
-        Event resignEvent = new Event();
-        this.gameEventList.add(resignEvent);
-        
-        resignEvent.setId(indexOfLastEvent());
-        resignEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
-        //resignEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //resignEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        //resignEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-        //resignEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-        resignEvent.setType(EventType.PLAYER_RESIGNED);
-        
+        addResignEvent(playerId);
+
+
         //TODO - FINISH WRTITING LOGIC
     }
     
@@ -394,7 +360,7 @@ public class RummikubWsImplementation {
     
     private void validateParamsAndThrowExceptionInIlegalCase(int playerId, List<ws.rummikub.Tile> tiles) throws InvalidParameters_Exception {
         checkCaseOfPlayerNotExsists(playerId);
-        checkCaseOfIlegalTileList(tiles);
+        checkCaseOfIlegalTileListThatRepresentsSeries(tiles);
     }
     
     private void validateParamsAndThrowExceptionInIlegalCase(int playerId, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
@@ -808,17 +774,7 @@ public class RummikubWsImplementation {
 
             initCurrentPlayerMove();
             
-
-            Event takeTileBackEvent = new Event();
-            this.gameEventList.add(takeTileBackEvent);
-
-            takeTileBackEvent.setId(indexOfLastEvent());
-            //takeTileBackEvent.setPlayerName(findPlayerByPlayerId(playerId).getName(/*MAYBE NOT NEED THAT SET*/null));
-            //takeTileBackEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-            //takeTileBackEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-            //takeTileBackEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
-            //takeTileBackEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
-            takeTileBackEvent.setType(EventType.GAME_START);
+            addGameStartEvent();
         }
     }
 
@@ -842,14 +798,184 @@ public class RummikubWsImplementation {
         return this.gameEventList.isEmpty()? 0 : this.gameEventList.size() - INDEX_NORMALIZATION;
     }
 
-    private void checkCaseOfIlegalTileList(List<ws.rummikub.Tile>  tiles) {
+    private void checkCaseOfIlegalTileListThatRepresentsSeries(List<ws.rummikub.Tile>  tiles) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private void validateParamsAndThrowExceptionInIlegalCaseOfLoadingGameFromXML(String xmlData) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void validateParamsAndThrowExceptionInIlegalCaseOfLoadingGameFromXML(String xmlData) throws DuplicateGameName_Exception,
+                                                                                                        InvalidParameters_Exception, 
+                                                                                                        InvalidXML_Exception {
+        throw new DuplicateGameName_Exception(null, null);
+        //throw new InvalidParameters_Exception("TEST", null);
+        //throw new InvalidXML_Exception(null, null);
     }
 
+    private Tile.Color convertToLogicColor(ws.rummikub.Color color) {
+        Tile.Color newColor;
+        
+        switch (color) {
+            case BLACK:
+                newColor = Tile.Color.BLACK;
+                break;
+
+            case BLUE:
+                newColor = Tile.Color.BLUE;
+                break;
+
+            case RED: 
+                newColor = Tile.Color.RED;
+                break;
+
+            case YELLOW:
+            default:
+                newColor = Tile.Color.YELLOW;
+                break;
+        }
+        
+        return newColor;
+    }
+
+    private Tile.TileNumber convertToLogicTileNum(int value) {
+        return Tile.TileNumber.getTileNumberByValue(value);
+    }
+
+    private Tile getLogicalTile(ws.rummikub.Tile tile) {
+        Tile.Color tileColor = convertToLogicColor(tile.getColor());
+        Tile.TileNumber tileNum = convertToLogicTileNum(tile.getValue());
+        return new Tile(tileColor, tileNum);
+    }
+    
+    
+    private boolean dealWithSingleMoveResualt(SingleMove singleMove) throws InvalidParameters_Exception {
+        SingleMove.SingleMoveResult singleMoveResualt = this.currentPlayerMove.implementSingleMove(singleMove);
+        boolean isLegalMoveDone = false;
+        InvalidParameters invalidParameters = new InvalidParameters();
+        RummikubFault rummikubFualt = new RummikubFault();
+
+        switch (singleMoveResualt) {
+            case TILE_NOT_BELONG_HAND: {
+                rummikubFualt.setFaultCode(null);
+                rummikubFualt.setFaultString("The tile not belong to the player in the current turn");
+                invalidParameters.setFaultInfo(rummikubFualt);
+                invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TILE_IS_NOT_BELONG_TO_HAND);
+                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TILE_IS_NOT_BELONG_TO_HAND,
+                                                  invalidParameters);               
+            }
+            case NOT_IN_THE_RIGHT_ORDER: {
+                rummikubFualt.setFaultCode(null);
+                rummikubFualt.setFaultString("The tile was placed not in increasing order");
+                invalidParameters.setFaultInfo(rummikubFualt);
+                invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TILE_INSERTED_NOT_IN_RIGHT_ORDER);
+                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TILE_INSERTED_NOT_IN_RIGHT_ORDER,
+                                                  invalidParameters);
+            }
+            case CAN_NOT_TOUCH_BOARD_IN_FIRST_MOVE: {
+                rummikubFualt.setFaultCode(null);
+                rummikubFualt.setFaultString("canot touch tiles that not belong to the player before finishing the first turn");
+                invalidParameters.setFaultInfo(rummikubFualt);
+                invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_CANT_TUCH_BOARD_IN_FIRST_MOVE);
+                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_CANT_TUCH_BOARD_IN_FIRST_MOVE,
+                                                  invalidParameters);
+            }
+            case LEGAL_MOVE:
+            default: {
+                isLegalMoveDone = true;
+                break;
+            }
+        }
+        return isLegalMoveDone;
+    }
+
+    private void addCreateSequenceEvent(int playerId, List<ws.rummikub.Tile> tiles) {
+        Event newSequenceCtearedEvent = new Event();
+        
+        newSequenceCtearedEvent.setId(indexOfLastEvent());
+        newSequenceCtearedEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //newSequenceCtearedEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //newSequenceCtearedEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        //newSequenceCtearedEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //newSequenceCtearedEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        newSequenceCtearedEvent.setType(EventType.SEQUENCE_CREATED);
+        this.gameEventList.add(newSequenceCtearedEvent);
+    }
+
+    private void addTileaddedEvent(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) {
+        Event addTileEvent = new Event();
+        
+        addTileEvent.setId(indexOfLastEvent());
+        addTileEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //addTileEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //addTileEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        addTileEvent.setTargetSequenceIndex(sequenceIndex);
+        addTileEvent.setTargetSequencePosition(sequencePosition);
+        addTileEvent.setType(EventType.TILE_ADDED);
+        this.gameEventList.add(addTileEvent);
+    }
+
+    private void addTakeBackTileEvent(int playerId, int sequenceIndex, int sequencePosition) {
+        Event takeTileBackEvent = new Event();
+        
+        takeTileBackEvent.setId(indexOfLastEvent());
+        takeTileBackEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        takeTileBackEvent.setSourceSequenceIndex(sequenceIndex);
+        takeTileBackEvent.setSourceSequencePosition(sequencePosition);
+        //takeTileBackEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //takeTileBackEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        takeTileBackEvent.setType(EventType.TILE_RETURNED);
+        this.gameEventList.add(takeTileBackEvent);
+    }
+
+    private void addMoveTileEvent(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition) {
+        Event tileMovedEvent = new Event();
+        
+        tileMovedEvent.setId(indexOfLastEvent());
+        tileMovedEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        tileMovedEvent.setSourceSequenceIndex(sourceSequenceIndex);
+        tileMovedEvent.setSourceSequencePosition(sourceSequencePosition);
+        tileMovedEvent.setTargetSequenceIndex(targetSequenceIndex);
+        tileMovedEvent.setTargetSequencePosition(targetSequencePosition);
+        tileMovedEvent.setType(EventType.TILE_MOVED);
+        this.gameEventList.add(tileMovedEvent);
+    }
+
+    private void addFinishTurnEvent(int playerId) {
+        Event finishTurnEvent = new Event();
+        
+        finishTurnEvent.setId(indexOfLastEvent());
+        finishTurnEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //finishTurnEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //finishTurnEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        //finishTurnEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //finishTurnEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        finishTurnEvent.setType(EventType.PLAYER_FINISHED_TURN);
+        this.gameEventList.add(finishTurnEvent);
+    }
+
+    private void addResignEvent(int playerId) {
+        Event resignEvent = new Event();
+        
+        resignEvent.setId(indexOfLastEvent());
+        resignEvent.setPlayerName(findPlayerByPlayerId(playerId).getName());
+        //resignEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //resignEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        //resignEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //resignEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        resignEvent.setType(EventType.PLAYER_RESIGNED);
+        this.gameEventList.add(resignEvent);
+    }
+
+    private void addGameStartEvent() {
+       Event takeTileBackEvent = new Event();
+        this.gameEventList.add(takeTileBackEvent);
+
+        takeTileBackEvent.setId(indexOfLastEvent());
+        //takeTileBackEvent.setPlayerName(findPlayerByPlayerId(playerId).getName(/*MAYBE NOT NEED THAT SET*/null));
+        //takeTileBackEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //takeTileBackEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        //takeTileBackEvent.setTargetSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
+        //takeTileBackEvent.setTargetSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
+        takeTileBackEvent.setType(EventType.GAME_START);
+    }
 }
 
 // <editor-fold defaultstate="collapsed" desc="user-description">
