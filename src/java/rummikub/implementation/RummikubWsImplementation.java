@@ -63,7 +63,7 @@ public class RummikubWsImplementation {
     }
     
     private void init(boolean isLoadedFromXML) {
-        this.rummikubLogic = new GameLogic();
+        //this.rummikubLogic = new GameLogic();
         this.serieGenerator = new SeriesGenerator();
         this.newMoveGenerator = new ComputerSingleMoveGenerator();
         
