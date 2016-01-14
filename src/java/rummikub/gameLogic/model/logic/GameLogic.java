@@ -91,19 +91,27 @@ public class GameLogic {
         }
     }
 
-    private void pickOneTilesWhenIllegalMove() {
+    private boolean pickOneTilesWhenIllegalMove() {
+        boolean turnSucceded = false;
+
         addTileToCurrentPlayerHand();
         this.currentPlayer.setNormalMoveDone(!MOVE_DONE);
+        
+        return turnSucceded;
     }
         
-    private void pickThreeTilesWhenIllegalMove() {
+    private boolean pickThreeTilesWhenIllegalMove() {
+        boolean turnSucceded = false;
+
         addTileToCurrentPlayerHand();
         addTileToCurrentPlayerHand();
         addTileToCurrentPlayerHand();
         this.currentPlayer.setNormalMoveDone(!MOVE_DONE);
+        
+        return turnSucceded;
     }
     
-    private void executePlayerFirstMoveLogic(PlayersMove currentPlayerMove) {
+    private boolean executePlayerFirstMoveLogic(PlayersMove currentPlayerMove) {
         boolean isFirstMoveValid = currentPlayerMove.isValidMove() &&
                                    currentPlayerMove.has30PointsSeriesMove();
 
@@ -112,26 +120,30 @@ public class GameLogic {
            this.currentPlayer.setListPlayerTiles(currentPlayerMove.getHandAfterMove()); 
            this.currentPlayer.setFirstMoveDone(MOVE_DONE);
         }
-        else
-        {
+        else {
             pickOneTilesWhenIllegalMove();
         }
+        
+        return isFirstMoveValid;
     }
     
-    private void executePlayerNormalMoveLogic(PlayersMove currentPlayerMove) {
+    private boolean executePlayerNormalMoveLogic(PlayersMove currentPlayerMove) {
         boolean validMove = currentPlayerMove.isValidMove();
+        boolean turnSucceded = validMove && currentPlayerMove.isUsedAtleastOneTile();
         
-        if (validMove && currentPlayerMove.isUsedAtleastOneTile()) {
+        if (turnSucceded) {
             this.gameBoard = currentPlayerMove.getBoardAfterMove();
             this.currentPlayer.setListPlayerTiles(currentPlayerMove.getHandAfterMove());
             this.currentPlayer.setNormalMoveDone(MOVE_DONE);
         } 
         else if(validMove){
-            pickOneTilesWhenIllegalMove();
+            turnSucceded = pickOneTilesWhenIllegalMove();
         }
         else{
-            pickThreeTilesWhenIllegalMove();
+            turnSucceded = pickThreeTilesWhenIllegalMove();
         }
+        
+        return turnSucceded;
     }
     
     private ArrayList<Player> createPlayers() {
@@ -199,7 +211,10 @@ public class GameLogic {
                                          this.gameOriginalInputedSettings.getHumanPlayersNames());
         this.gameHeap.resetTiles();
         this.indexOfCurrentPlayer = 0;
-        this.currentPlayer = this.players.get(indexOfCurrentPlayer);
+        
+        if(!this.players.isEmpty()) {
+            this.currentPlayer = this.players.get(indexOfCurrentPlayer);
+        }
         this.gameBoard.initBoard();
         this.isGameOver = false;
         this.isTie = false;
@@ -210,17 +225,19 @@ public class GameLogic {
         this.gameSettings = null;
     }
     
-    public void playSingleTurn(PlayersMove currentPlayerMove) {
+    public boolean playSingleTurn(PlayersMove currentPlayerMove) {
+        boolean turnSucceded;
         
         if(currentPlayerMove.getIsTurnSkipped()) {
-            pickOneTilesWhenIllegalMove();
+            turnSucceded = pickOneTilesWhenIllegalMove();
         }
         else if(currentPlayer.isFirstMoveDone()) {
-            executePlayerNormalMoveLogic(currentPlayerMove);
+            turnSucceded = executePlayerNormalMoveLogic(currentPlayerMove);
         }
         else{
-            executePlayerFirstMoveLogic(currentPlayerMove);
+            turnSucceded = executePlayerFirstMoveLogic(currentPlayerMove);
         }
+        return turnSucceded;
     }
     
     public void swapTurns() {
@@ -325,5 +342,11 @@ public class GameLogic {
         }
         
         return numberOfHumansJoinedTheGame;
+    }
+    
+    public void shufflePlayersBeforeStartingGame() {
+        Collections.shuffle(this.players);
+        this.indexOfCurrentPlayer = 0;
+        this.currentPlayer = this.players.get(indexOfCurrentPlayer);
     }
 }
