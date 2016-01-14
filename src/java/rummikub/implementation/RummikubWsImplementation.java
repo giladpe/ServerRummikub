@@ -140,7 +140,8 @@ public class RummikubWsImplementation {
                                                                                               InvalidParameters_Exception {
         
         validateParamsAndThrowExceptionInIlegalCase(gameName, humanPlayers, computerizedPlayers);
-
+        
+        this.rummikubLogic = new GameLogic();
         Settings gameSettings = new Settings(gameName, humanPlayers, computerizedPlayers);
         createNewGame(gameSettings);
         
