@@ -109,8 +109,7 @@ public class RummikubWsImplementation {
     }
 
     //TODO
-    public String createGameFromXML(String xmlData) throws DuplicateGameName_Exception,
-                                                           InvalidParameters_Exception, 
+    public String createGameFromXML(String xmlData) throws DuplicateGameName_Exception, InvalidParameters_Exception, 
                                                            InvalidXML_Exception {
         String result = "";
         
@@ -141,7 +140,6 @@ public class RummikubWsImplementation {
         
         validateParamsAndThrowExceptionInIlegalCase(gameName, humanPlayers, computerizedPlayers);
         
-        this.rummikubLogic = new GameLogic();
         Settings gameSettings = new Settings(gameName, humanPlayers, computerizedPlayers);
         createNewGame(gameSettings);
         
@@ -189,12 +187,12 @@ public class RummikubWsImplementation {
                                                                    InvalidParameters_Exception {
         validateParamsAndThrowExceptionInIlegalCase(gameName, playerName);
         
-        Player newPlayer;
+        Player newPlayer = new HumanPlayer(playerName);
         int playerId;
         //before change playerDetails from list to map
         //int indexOfPlayerInHisGame;
         
-        newPlayer = new HumanPlayer(gameName);
+        
         this.rummikubLogic.addNewHumanPlayer(newPlayer);
 
         //before change playerDetails from list to map
@@ -438,8 +436,8 @@ public class RummikubWsImplementation {
     private void checkCaseOfGameDoesNotExists(String gameName) throws GameDoesNotExists_Exception {
 
         checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(gameName); 
-             
-        if (!isGameNameAlreadyExsists(gameName)) {
+        //**IMPORTANT**:: isGameNameAlreadyExsists(gameName) = > always returns false
+        if (isGameNameAlreadyExsists(gameName)) {
             GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
             RummikubFault rummikubFualt = new RummikubFault();
 
