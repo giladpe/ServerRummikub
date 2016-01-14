@@ -85,6 +85,10 @@ public class Tile implements Comparable<Tile> {
     //Constants
     private final static int HAS_ONE_JOCKER_IN_HAND = 2;
     private final static int HAS_TWO_JOCKER_IN_HAND = 3;
+    public final static int MAX_TILE_VALUE = TileNumber.THIRTEEN.getTileNumberValue();
+    public final static int MIN_TILE_VALUE = TileNumber.ONE.getTileNumberValue();
+
+
 
     // Data members
     private final Color tileColor;

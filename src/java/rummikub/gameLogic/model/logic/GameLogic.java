@@ -174,7 +174,6 @@ public class GameLogic {
     }
 
     
-    
     private void initGameSettingsFromFile(String gameName) {
         
         int totalNumberOfPlayer =  this.players.size();
@@ -327,6 +326,7 @@ public class GameLogic {
     }
 
     public void addNewHumanPlayer(Player newPlayer) {
+        newPlayer.initPlayer(this.gameHeap.getNewHandFromHeap());
         this.players.add(newPlayer);
         this.gameSettings.addHumanPlayerName(newPlayer.getName());
         this.gameOriginalInputedSettings.addHumanPlayer(newPlayer.getName());

@@ -69,6 +69,11 @@ public class Utils {
         
         // error messages
         public static class ErrorMessages{
+            public static final String ILEGAL_TILE_POSITION_INDEX = "Such tile position not exsists, the position is:";
+            public static final String ILEGAL_SEQUENCE_INDEX = "Such sequence position not exsists, the position is:";
+            public static final String NEGATIVE_SEQUENCE_INDEX = "The sequence index is negative, his value is:";
+            public static final String NEGATIVE_TILE_POSITION_INDEX = "The position index is negative, his value is:";
+            public static final String INVALID_TILE_LIST = "The tile list is ilegal";
             public static final String GAME_NOT_EXSISTS_WITH_GIVEN_PLAYER_ID = "There is no game with such player id";
             public static final String PLAYER_ID_NOT_EXSISTS = "player id not exsists in the game";
             public static final String STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES = "The input is null or empty or contains starting white spaces";
