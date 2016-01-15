@@ -14,6 +14,7 @@ import rummikub.gameLogic.model.gameobjects.Tile;
 import rummikub.gameLogic.model.player.ComputerPlayer;
 import rummikub.gameLogic.model.player.HumanPlayer;
 import rummikub.gameLogic.model.player.Player;
+import rummikub.gameLogic.view.ioui.Utils;
 
 
 public class GameLogic {
@@ -287,8 +288,7 @@ public class GameLogic {
         this.players.remove(currentPlayer);
         this.gameSettings.removePlayerFromGame(currentPlayer.getIsHuman());
         
-        currentPlayer.getListPlayerTiles().stream().forEach((tileToAdd) -> 
-                    { this.gameHeap.addTile(tileToAdd); });
+        currentPlayer.getListPlayerTiles().stream().forEach((tileToAdd) -> { this.gameHeap.addTile(tileToAdd); });
         gameHeap.shuffleHeapTiles();
         indexOfCurrentPlayer--;
     }
@@ -350,5 +350,31 @@ public class GameLogic {
         //this.indexOfCurrentPlayer = 0;
         this.indexOfCurrentPlayer = this.players.isEmpty()? 0 : ThreadLocalRandom.current().nextInt(0, this.players.size() -1);
         this.currentPlayer = this.players.get(indexOfCurrentPlayer);
+    }
+    
+    public boolean isReachedOneOfEndGameConditions() {
+        return isGameOver() || isOnlyOnePlayerLeft() || isHumanPlayerLeftInGame();
+    }
+    
+    public String gameResult() {
+        String gameResult = Utils.Constants.QuestionsAndMessagesToUser.TIE;
+
+        if (!isTie()) {
+            gameResult = getWinner().getName();
+        }
+        
+        return gameResult;
+    }
+
+    public Player getPlayerByName(String playerName) {
+        boolean found = false;
+        Player player = null;
+        for (Iterator<Player> it = this.players.iterator(); !found && it.hasNext();) {
+            player = it.next();
+            
+            found = player.getName().equalsIgnoreCase(playerName);
+        }
+        
+        return player;
     }
 }

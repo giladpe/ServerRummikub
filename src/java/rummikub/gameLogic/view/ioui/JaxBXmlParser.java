@@ -14,9 +14,11 @@ import XmlClasses.PlayerType;
 import XmlClasses.Players;
 import XmlClasses.Rummikub;
 import XmlClasses.Tile;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;           
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +38,13 @@ import rummikub.gameLogic.model.player.ComputerPlayer;
 import rummikub.gameLogic.model.player.HumanPlayer;
 import rummikub.gameLogic.model.player.Player;
 import org.xml.sax.SAXException;
+import ws.rummikub.GameDoesNotExists;
+import ws.rummikub.GameDoesNotExists_Exception;
+import ws.rummikub.InvalidParameters;
+import ws.rummikub.InvalidParameters_Exception;
+import ws.rummikub.InvalidXML;
+import ws.rummikub.InvalidXML_Exception;
+import ws.rummikub.RummikubFault;
 
 
 public class JaxBXmlParser {
@@ -486,6 +495,7 @@ public class JaxBXmlParser {
             return false;
         }
     }
+    
     public static boolean loadSettingsFromXml(File source) throws SAXException, IOException{
         //get the Schema from the XSD file
         URL csdURL = JaxBXmlParser.class.getResource(RESOURCES + "rummikub.xsd");
@@ -545,26 +555,98 @@ public class JaxBXmlParser {
     }
 
     public static boolean saveAsSettingsToXml(ArrayList<Player> playerArray, 
-                                          rummikub.gameLogic.model.gameobjects.Board board, 
-                                          String gameName, 
-                                          String currPlayerName) throws JAXBException, FileNotFoundException, IOException, SAXException{
+                                              rummikub.gameLogic.model.gameobjects.Board board, 
+                                              String gameName, 
+                                              String currPlayerName) throws JAXBException, FileNotFoundException, IOException, SAXException{
         String strPathGameFileName = InputOutputParser.getPathToSaveXmlFile();
-        
+
         if(lastPathSaved == null){
-           lastPathSaved = strPathGameFileName;
+            lastPathSaved = strPathGameFileName;
         }
-        
+
         return saveSettinngToXmlInSpecificFile(strPathGameFileName, playerArray, board, gameName, currPlayerName);
-  }
-        public static boolean saveAsSettingsToXml(String strPathGameFileName,ArrayList<Player> playerArray, 
-                                          rummikub.gameLogic.model.gameobjects.Board board, 
-                                          String gameName, 
-                                          String currPlayerName) throws JAXBException, FileNotFoundException, IOException, SAXException{
+    }
+    public static boolean saveAsSettingsToXml(String strPathGameFileName,ArrayList<Player> playerArray, 
+                                              rummikub.gameLogic.model.gameobjects.Board board, 
+                                              String gameName, 
+                                              String currPlayerName) throws JAXBException, FileNotFoundException, IOException, SAXException{
 
         if(lastPathSaved == null){
            lastPathSaved = strPathGameFileName;
         }
-        
+
         return saveSettinngToXmlInSpecificFile(strPathGameFileName, playerArray, board, gameName, currPlayerName);
-  }
+    }
+    
+    public static boolean loadSettingsFromXml(String source) throws SAXException, IOException, InvalidParameters_Exception, InvalidXML_Exception{
+        //get the Schema from the XSD file
+        URL csdURL = JaxBXmlParser.class.getResource(RESOURCES + "rummikub.xsd");
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = schemaFactory.newSchema(csdURL);
+
+        // Get the file chosen from here
+    
+        try {
+            JAXBContext context = JAXBContext.newInstance(Rummikub.class);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+
+            //attach the Schema to the unmarshaller so it will use it to run validations
+            //on the content of the XML
+            unmarshaller.setSchema(schema);
+            InputStream stream = new ByteArrayInputStream(source.getBytes());
+            Rummikub rummikub = (Rummikub) unmarshaller.unmarshal(stream); //unmarshal(xmlInputStream);
+
+            //Rummikub rummikub = (Rummikub) unmarshaller.unmarshal(source); //unmarshal(xmlInputStream);
+            
+            if(!checkGenerateValidation(rummikub)){
+                InvalidParameters invalidParameters = new InvalidParameters();
+                RummikubFault rummikubFualt = new RummikubFault();
+
+                rummikubFualt.setFaultCode(null);
+                rummikubFualt.setFaultString("atleast one of the game parameters is invlad in the file");
+                invalidParameters.setFaultInfo(rummikubFualt);
+                invalidParameters.setMessage(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG);
+            
+                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG ,
+                                                  invalidParameters);
+                //throw new JAXBException("");
+            }
+            
+            // Copy properties
+            board = copyGenratedBoardToBoard(rummikub.getBoard());
+            int sum = getSumOfPointsInBoard(board);
+            boolean isValidBoard = (board.validateBoard() || sum == 0) && (sum >= 30 || sum == 0);
+            
+            if(isValidBoard){
+                playerArray = copyGeneratedPlayersToPlayers(rummikub.getPlayers(), sum);
+                currPlayer = getCurrPlayerFromGeneratedPlayers(rummikub.getPlayers(), rummikub.getCurrentPlayer(), sum);
+                currPlayer = playerArray.get(playerArray.indexOf(currPlayer));
+                gameName = rummikub.getName();
+            }
+            else{
+                InvalidParameters invalidParameters = new InvalidParameters();
+                RummikubFault rummikubFualt = new RummikubFault();
+
+                rummikubFualt.setFaultCode(null);
+                rummikubFualt.setFaultString("invalid board");
+                invalidParameters.setFaultInfo(rummikubFualt);
+                invalidParameters.setMessage(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG + "reason: invalid game Board");
+            
+                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG ,
+                                                  invalidParameters);
+            }
+            
+            return true;
+        }
+        catch (JAXBException exception){
+                InvalidXML invalidXML = new InvalidXML();
+                RummikubFault rummikubFualt = new RummikubFault();
+
+                rummikubFualt.setFaultCode(null);
+                rummikubFualt.setFaultString("xml file error");
+                invalidXML.setFaultInfo(rummikubFualt);
+                invalidXML.setMessage(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG);
+                throw new InvalidXML_Exception(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG, invalidXML);
+        }
+    }
 }
