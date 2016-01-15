@@ -7,6 +7,7 @@ package rummikub.gameLogic.model.logic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.concurrent.ThreadLocalRandom;
 import rummikub.gameLogic.model.gameobjects.Board;
 import rummikub.gameLogic.model.gameobjects.Heap;
 import rummikub.gameLogic.model.gameobjects.Tile;
@@ -345,8 +346,9 @@ public class GameLogic {
     }
     
     public void shufflePlayersBeforeStartingGame() {
-        Collections.shuffle(this.players);
-        this.indexOfCurrentPlayer = 0;
+        //Collections.shuffle(this.players);
+        //this.indexOfCurrentPlayer = 0;
+        this.indexOfCurrentPlayer = this.players.isEmpty()? 0 : ThreadLocalRandom.current().nextInt(0, this.players.size() -1);
         this.currentPlayer = this.players.get(indexOfCurrentPlayer);
     }
 }

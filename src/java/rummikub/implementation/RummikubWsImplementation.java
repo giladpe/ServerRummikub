@@ -31,6 +31,8 @@ public class RummikubWsImplementation {
     //Constants:
     private static final boolean WITH_TILE_LIST = true;
     private static final boolean LOADED_FROM_XML = true;
+    private static final boolean DEAMON_THREAD = true;
+
     private static int INDEX_NORMALIZATION = 1;
     private static final int START_OF_THE_SERIES = 0;
     private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(2);
@@ -71,7 +73,7 @@ public class RummikubWsImplementation {
         this.playerDetailes = new HashMap<>();
         this.gameStatus = GameStatus.WAITING;
         this.isLoadedFromXML = isLoadedFromXML;
-        this.timer = new Timer();
+        this.timer = new Timer(DEAMON_THREAD);
         this.eventManager = new EventManager();
     }
 
@@ -98,14 +100,7 @@ public class RummikubWsImplementation {
         else { 
             newEventsListForCurrPlayer = new ArrayList<>(allEventsList.subList(eventId + 1, indexOfLastEvent));
         }
-        
-//        if (hasEventThatNeedUserInput(eventsList)) {
-//            //Timer timer = new Timer();
-//        }
-//        else {
-//            
-//        }
-
+  
         return newEventsListForCurrPlayer;
     }
 
@@ -317,7 +312,6 @@ public class RummikubWsImplementation {
 
         //REALY?????? MAYBE WITH DIFF ID??
         this.timer.cancel();
-
         validateParamsAndThrowExceptionInIlegalCase(playerId);
         
         this.eventManager.addFinishTurnEvent(playerId);
@@ -339,6 +333,7 @@ public class RummikubWsImplementation {
         }
         else {
             this.rummikubLogic.swapTurns();
+            initCurrentPlayerMove();
             this.eventManager.addPlayerTurnEvent(this.rummikubLogic.getCurrentPlayer().getName());
             
             if(this.rummikubLogic.getCurrentPlayer().getIsHuman()) {
@@ -1313,7 +1308,8 @@ public class RummikubWsImplementation {
 
     private void setTimerForPlayerResponse(int playerId) {
         this.timer.cancel();
-        
+        this.timer  = new Timer(DEAMON_THREAD);
+       
         this.timer.schedule(new TimerTask() {
 
             @Override
@@ -1321,6 +1317,15 @@ public class RummikubWsImplementation {
                 doWhenPlayerResign(playerId);
             }
         }, TIMER_DELAY);
+        
+        //TEST:
+//        this.timer.schedule(new TimerTask() {
+//
+//            @Override
+//            public void run() {
+//                doWhenPlayerResign(playerId);
+//            }
+//        }, TIMER_DELAY);
     }
     
     private void doWhenPlayerResign(int playerId) {
