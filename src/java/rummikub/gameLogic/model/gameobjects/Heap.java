@@ -18,19 +18,10 @@ public class Heap {
     private final ArrayList<Tile> tileList; 
     
     // Constructor
-    private Heap() {
+    public Heap() {
        // Reset all tiles
        this.tileList = new ArrayList<>();
        resetTiles();
-    }
-    
-    // Singelton
-    public static Heap getInstance(){
-       if(instance == null){
-           instance = new Heap();
-       }
-       
-       return instance;
     }
    
     // Getter && Setter

@@ -40,7 +40,7 @@ public class GameLogic {
         indexOfCurrentPlayer = 0;
         currentPlayer = new HumanPlayer("");
         gameBoard = new Board();
-        gameHeap = Heap.getInstance();
+        gameHeap = new Heap();
         isTie = isGameOver = false;
     }    
 
