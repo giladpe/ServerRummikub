@@ -101,7 +101,7 @@ public class RummikubWsImplementation {
             newEventsListForCurrPlayer = new ArrayList<>();
         }
         else { 
-            newEventsListForCurrPlayer = new ArrayList<>(allEventsList.subList(eventId + 1, indexOfLastEvent));
+            newEventsListForCurrPlayer = allEventsList.subList(eventId + 1, indexOfLastEvent);
         }
   
         return newEventsListForCurrPlayer;
@@ -360,10 +360,7 @@ public class RummikubWsImplementation {
         this.timer.cancel();
         //finish wrtiting this method - used with timer and here
         doWhenPlayerResign(playerId);
-        
 
-
-        //TODO - FINISH WRTITING LOGIC
     }
     
     //********** Public functions used by the Web Service - END **********/
