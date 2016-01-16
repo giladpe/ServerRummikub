@@ -353,7 +353,7 @@ public class GameLogic {
     }
     
     public boolean isReachedOneOfEndGameConditions() {
-        return isGameOver() || isOnlyOnePlayerLeft() || isHumanPlayerLeftInGame();
+        return isGameOver() || isOnlyOnePlayerLeft() || !isHumanPlayerLeftInGame();
     }
     
     public String gameResult() {
