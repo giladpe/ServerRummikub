@@ -868,8 +868,8 @@ public class RummikubWsImplementation {
 //                playerDetailes.setStatus(PlayerStatus.ACTIVE);
 //            }
 
-            initCurrentPlayerMove();
             this.rummikubLogic.shufflePlayersBeforeStartingGame();
+            initCurrentPlayerMove();
             
             this.eventManager.addGameStartEvent();
             this.eventManager.addPlayerTurnEvent(this.rummikubLogic.getCurrentPlayer().getName());
