@@ -347,6 +347,8 @@ public class RummikubWsImplementation {
             revertTheTurn(playerId);
         }
         
+        initPlayerDetailsTileList(findPlayerDetails(playerId), this.rummikubLogic.getCurrentPlayer());
+        
         if (this.rummikubLogic.isReachedOneOfEndGameConditions()) {
             onGameOverActions();
         }
