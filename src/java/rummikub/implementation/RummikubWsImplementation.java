@@ -237,9 +237,10 @@ public class RummikubWsImplementation {
     //TODO
     public void createSequence(int playerId, List<ws.rummikub.Tile> tiles) throws InvalidParameters_Exception {
 
-        setTimerForPlayerResponse(playerId);
 
         validateParamsAndThrowExceptionInIlegalCase(playerId, tiles);
+        setTimerForPlayerResponse(playerId);
+
         this.eventManager.addCreateSequenceEvent(playerId, tiles);
         
         Board currBoard = this.currentPlayerMove.getBoardAfterMove();
