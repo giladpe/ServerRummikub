@@ -921,7 +921,7 @@ public class RummikubWsImplementation {
             foundProblem = tiles.size() == Tile.MAX_TILE_VALUE;
             for (Iterator<ws.rummikub.Tile> it = tiles.iterator(); !foundProblem && it.hasNext();) {
                 ws.rummikub.Tile tile = it.next();
-                foundProblem = tile.getColor() != null && tile.getValue() >= Tile.MIN_TILE_VALUE && tile.getValue() <= Tile.MAX_TILE_VALUE; 
+                foundProblem = !(tile.getColor() != null && tile.getValue() >= Tile.MIN_TILE_VALUE && tile.getValue() <= Tile.MAX_TILE_VALUE); 
             }
         }
         
