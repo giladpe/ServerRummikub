@@ -212,7 +212,6 @@ public class RummikubWsImplementation {
             this.rummikubLogic.addNewHumanPlayer(newPlayer);
         }
 
-
         //before change playerDetails from list to map
 
         //indexOfPlayerInHisGame = indexOfLastEvent();
