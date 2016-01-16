@@ -1408,6 +1408,7 @@ public class RummikubWsImplementation {
         this.eventManager.addResignEvent(playerId);
         
         this.rummikubLogic.removeCurrentPlayerFromTheGame();
+        this.playerDetailes.remove(findPlayerId(findPlayerDetails(playerId).getName()));
         
         if (!this.rummikubLogic.isGameOver()) {
             this.rummikubLogic.swapTurns();
