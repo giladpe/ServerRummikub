@@ -34,7 +34,6 @@ public class RummikubWsImplementation {
     private static final boolean WITH_TILE_LIST = true;
     private static final boolean LOADED_FROM_XML = true;
     private static final boolean DEAMON_THREAD = true;
-
     private static int INDEX_NORMALIZATION = 1;
     private static final int START_OF_THE_SERIES = 0;
     private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(2);
@@ -131,7 +130,7 @@ public class RummikubWsImplementation {
             invalidXML.setMessage(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG);
             throw new InvalidXML_Exception(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG, invalidXML);
         } 
-        
+        this.isLoadedFromXML = LOADED_FROM_XML;
         return this.rummikubLogic.getGameSettings().getGameName();
     }
     
@@ -148,14 +147,14 @@ public class RummikubWsImplementation {
     //DONE
     public void createGame(String gameName, int humanPlayers, int computerizedPlayers) throws DuplicateGameName_Exception,
                                                                                               InvalidParameters_Exception {
-        
+        if (this.gameStatus == GameStatus.FINISHED) {
+            initGameComponetsToPrepareForNextGame();
+        }
         validateParamsAndThrowExceptionInIlegalCase(gameName, humanPlayers, computerizedPlayers);
         
         Settings gameSettings = new Settings(gameName, humanPlayers, computerizedPlayers);
         createNewGame(gameSettings);
         
-        //inits only computer players
-        initPlayerDetailesList();
     }
     
     //DONE
@@ -302,7 +301,7 @@ public class RummikubWsImplementation {
         Point source = new Point(sequenceIndex, sequencePosition);
         SingleMove singleMove = new SingleMove(source, SingleMove.MoveType.BOARD_TO_HAND);
         Tile logicTile  = this.currentPlayerMove.getBoardAfterMove().getSpecificTile(sequenceIndex, sequencePosition);
-        ws.rummikub.Tile jaxbTile = createJaxbTile(logicTile);
+        ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(logicTile);
         
         if (dealWithSingleMoveResualt(singleMove)) {
             PlayerDetails playerDetails = findPlayerDetails(playerId);
@@ -374,6 +373,8 @@ public class RummikubWsImplementation {
     
     private void createNewGame(Settings gameSetting) {
         this.rummikubLogic = new GameLogic();
+        this.isLoadedFromXML = !LOADED_FROM_XML;
+
         this.rummikubLogic.setGameSettings(gameSetting);
         
         //A: i changed it to new....
@@ -382,8 +383,8 @@ public class RummikubWsImplementation {
         
         this.rummikubLogic.initGameViaWebRequest();
                 
-        //probbly not need it here
-        //initCurrentPlayerMove();
+        //inits only computer players
+        initPlayerDetailesList();
     }
     
     private void initCurrentPlayerMove() {
@@ -758,13 +759,15 @@ public class RummikubWsImplementation {
     }
     
     private void initPlayerDetailsTileList(PlayerDetails playerDetails, Player currPlayer) {
+        playerDetails.getTiles().clear();
+
         for (Tile currTile : currPlayer.getListPlayerTiles()) {
-            ws.rummikub.Tile jaxbTile = createJaxbTile(currTile);
+            ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(currTile);
             playerDetails.getTiles().add(jaxbTile);
         }
     }
     
-    private ws.rummikub.Tile createJaxbTile(Tile currTile) {
+    private ws.rummikub.Tile convertLogicTileToWsTile(Tile currTile) {
         ws.rummikub.Tile jaxbTile = new ws.rummikub.Tile();
 
         setJaxbTileColor(jaxbTile, currTile);
@@ -965,7 +968,7 @@ public class RummikubWsImplementation {
         return Tile.TileNumber.getTileNumberByValue(value);
     }
 
-    private Tile getLogicalTile(ws.rummikub.Tile tile) {
+    private Tile convertWsTileToLogicTile(ws.rummikub.Tile tile) {
         Tile.Color tileColor = convertToLogicColor(tile.getColor());
         Tile.TileNumber tileNum = convertToLogicTileNum(tile.getValue());
         return new Tile(tileColor, tileNum);
@@ -1017,10 +1020,12 @@ public class RummikubWsImplementation {
         ArrayList<ws.rummikub.Tile> jaxbTilesList = new ArrayList<>();
         
         this.eventManager.addRevertEvent(playerId);
-
+        PlayerDetails currentPlayerDetails = findPlayerDetails(playerId);
+        initPlayerDetailsTileList(currentPlayerDetails, this.rummikubLogic.getCurrentPlayer());
+        
         for (Serie serie : lastTurnBoard) {
             for (Tile logicTile : serie.getSerieOfTiles()) {
-                jaxbTilesList.add(createJaxbTile(logicTile));
+                jaxbTilesList.add(convertLogicTileToWsTile(logicTile));
             }
             
             this.eventManager.addCreateSequenceEvent(playerId, jaxbTilesList);
@@ -1092,31 +1097,52 @@ public class RummikubWsImplementation {
     }
 
     private void onGameOverActions() {
+        this.gameStatus = GameStatus.FINISHED;
         String gameResult = this.rummikubLogic.gameResult();
         this.eventManager.addGameOverEvent();
         this.eventManager.addGameWinnerEvent(gameResult);
     }
 
     private void addEventsAfterComputerMove(SingleMove singleMove, int playerId) {
-        
-        int indexToAddNewSerieToBoard = this.currentPlayerMove.getBoardAfterMove().boardSize();
-        
-        if(indexToAddNewSerieToBoard == singleMove.getpTarget().getX()) {
-            ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
-            tileList.add(createJaxbTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource())));
-            try{
-                createSequence(playerId, tileList);
+        if (singleMove != null) {
+            int indexToAddNewSerieToBoard = this.currentPlayerMove.getBoardAfterMove().boardSize();
+
+            if(indexToAddNewSerieToBoard == singleMove.getpTarget().getX()) {
+                ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
+                tileList.add(convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource())));
+                try{
+                    createSequence(playerId, tileList);
+                }
+                catch (InvalidParameters_Exception ex) {}
             }
-            catch (InvalidParameters_Exception ex) {}
+            else {
+                ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource()));
+                try{
+                    addTile(playerId, jaxbTile, singleMove.getpTarget().x, singleMove.getpTarget().y);
+                }
+                catch (InvalidParameters_Exception ex) {}
+            }    
         }
         else {
-            ws.rummikub.Tile jaxbTile = createJaxbTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource()));
-            try{
-                addTile(playerId, jaxbTile, singleMove.getpTarget().x, singleMove.getpTarget().y);
-            }
-            catch (InvalidParameters_Exception ex) {}
+            currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
         }
+        
     }
+
+    private void initGameComponetsToPrepareForNextGame() {
+
+        this.rummikubLogic = null;
+        this.serieGenerator = new SeriesGenerator();
+        this.newMoveGenerator = new ComputerSingleMoveGenerator();
+        //private PlayersMove currentPlayerMove;
+
+        this.playerDetailes.clear();
+        this.gameStatus = GameStatus.WAITING;
+        this.isLoadedFromXML = !LOADED_FROM_XML;
+        this.timer = new Timer(DEAMON_THREAD);
+        this.eventManager.clearAllEvents();
+    }
+
     
     private class EventManager{
 
@@ -1351,6 +1377,10 @@ public class RummikubWsImplementation {
             ArrayList<Event> eventsList = this.gameEventList;
             return eventsList;
         }
+
+        private void clearAllEvents() {
+            this.gameEventList.clear();
+        }
     }
     
 
@@ -1389,7 +1419,7 @@ public class RummikubWsImplementation {
     private void moveTileFromHandToBoard(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
 
         Point target = new Point(sequenceIndex, sequencePosition);
-        Tile logicalTile = getLogicalTile(tile);
+        Tile logicalTile = convertWsTileToLogicTile(tile);
 
         int IndexInHand = this.currentPlayerMove.getHandAfterMove().indexOf(logicalTile);
         SingleMove singleMove = new SingleMove(target, IndexInHand, SingleMove.MoveType.HAND_TO_BOARD);
@@ -1406,7 +1436,7 @@ public class RummikubWsImplementation {
         if (isComputerPlayer) {
 
             while (isComputerPlayer) {
-                SingleMove singleMove = computerPlayerMalesSingleMove();
+                SingleMove singleMove = computerPlayerMakesSingleMove();
                 addEventsAfterComputerMove(singleMove, playerId);
 
                 try {
@@ -1432,7 +1462,7 @@ public class RummikubWsImplementation {
         }
     }
      
-    private SingleMove computerPlayerMalesSingleMove() {
+    private SingleMove computerPlayerMakesSingleMove() {
         SingleMove singleMove;
         Serie serie;
 
