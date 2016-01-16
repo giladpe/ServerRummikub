@@ -265,7 +265,6 @@ public class RummikubWsImplementation {
     public void addTile(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) 
                                                                       throws InvalidParameters_Exception {
         
-
         validateParamsAndThrowExceptionInIlegalCase(playerId, tile, sequenceIndex, sequencePosition);
         
         setTimerForPlayerResponse(playerId);
@@ -1075,7 +1074,7 @@ public class RummikubWsImplementation {
                                                   invalidParameters);
         }
 
-        if (sequencePosition <= this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex).getSizeOfSerie()) {
+        if (sequencePosition > this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex).getSizeOfSerie()) {
             rummikubFualt.setFaultCode(null);
             rummikubFualt.setFaultString("such tile position of tile not exsists:" + String.valueOf(sequencePosition));
             invalidParameters.setFaultInfo(rummikubFualt);
