@@ -241,8 +241,6 @@ public class RummikubWsImplementation {
         validateParamsAndThrowExceptionInIlegalCase(playerId, tiles);
         setTimerForPlayerResponse(playerId);
 
-        this.eventManager.addCreateSequenceEvent(playerId, tiles);
-        
         Board currBoard = this.currentPlayerMove.getBoardAfterMove();
         int sequenceIndex = currBoard.isEmpty()? 0 : currBoard.boardSize();
         int sequencePosition = 0;
@@ -251,6 +249,9 @@ public class RummikubWsImplementation {
             moveTileFromHandToBoard(playerId, tile, sequenceIndex, sequencePosition);
             sequencePosition++;
         }
+        
+        this.eventManager.addCreateSequenceEvent(playerId, tiles);
+
         /**
         i dont think this is the right one
         for (ws.rummikub.Tile tile : tiles) {
@@ -275,14 +276,15 @@ public class RummikubWsImplementation {
         
         if (sequencePosition > START_OF_THE_SERIES && sequencePosition < END_OF_THE_SERIES ) {
             //split case
-            this.eventManager.addCreateSequenceEvent(playerId, /*no need for this param so far*/null);
+            ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
+            tileList.add(tile);
             int targetSequencePosition = 1;
             int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
                     0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
-            // i think i dont ned it here
-            //this.eventManager.addTileAddedEvent(playerId, tile, sequenceIndex, sequencePosition);
+
             moveTileFromHandToBoard(playerId, tile, indexLastSerie, START_OF_THE_SERIES);
-            
+            this.eventManager.addCreateSequenceEvent(playerId, tileList);
+
             for (int indexSourceTile = sequencePosition ; indexSourceTile < serie.getSizeOfSerie(); indexSourceTile++) {
                 moveTile(playerId, sequenceIndex, indexSourceTile, indexLastSerie, targetSequencePosition);
                 targetSequencePosition++;
@@ -290,8 +292,8 @@ public class RummikubWsImplementation {
         }
         else {
             //adding tile to end or start of serie
-            this.eventManager.addTileAddedEvent(playerId, tile, sequenceIndex, sequencePosition);
             moveTileFromHandToBoard(playerId, tile, sequenceIndex, sequencePosition);
+            this.eventManager.addTileAddedEvent(playerId, tile, sequenceIndex, sequencePosition);
         }
     }
     
@@ -302,7 +304,6 @@ public class RummikubWsImplementation {
         validateParamsAndThrowExceptionInIlegalCase(playerId, sequenceIndex, sequencePosition);
 
         setTimerForPlayerResponse(playerId);
-        this.eventManager.addTakeBackTileEvent(playerId, sequenceIndex, sequencePosition);
         
         Point source = new Point(sequenceIndex, sequencePosition);
         SingleMove singleMove = new SingleMove(source, SingleMove.MoveType.BOARD_TO_HAND);
@@ -312,6 +313,7 @@ public class RummikubWsImplementation {
         if (dealWithSingleMoveResualt(singleMove)) {
             PlayerDetails playerDetails = findPlayerDetails(playerId);
             playerDetails.getTiles().add(jaxbTile);
+            this.eventManager.addTakeBackTileEvent(playerId, sequenceIndex, sequencePosition);
         }
     }
 
@@ -325,13 +327,13 @@ public class RummikubWsImplementation {
         validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
         
         setTimerForPlayerResponse(playerId);
-        this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
 
         Point source = new Point(sourceSequenceIndex, sourceSequencePosition);
         Point target = new Point(targetSequenceIndex, targetSequencePosition);
 
         SingleMove singleMove = new SingleMove(target, source, SingleMove.MoveType.BOARD_TO_BOARD);
         dealWithSingleMoveResualt(singleMove);
+        this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
     }
 
     //TODO
@@ -356,8 +358,6 @@ public class RummikubWsImplementation {
         else {
             onSwapTurnActions();
         }
-        
-        
     }
 
     //TODO
