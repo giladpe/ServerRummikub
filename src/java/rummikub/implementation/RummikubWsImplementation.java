@@ -1191,7 +1191,7 @@ public class RummikubWsImplementation {
 
             gameStartEvent.setId(indexForNewtEvent());
             gameStartEvent.setTimeout(DISABLED_TIMER);
-            gameStartEvent.getTiles();
+            //gameStartEvent.getTiles();
             //gameStartEvent.setPlayerName(findPlayerByPlayerId(playerId).getName(/*MAYBE NOT NEED THAT SET*/null));
             //gameStartEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
             //gameStartEvent.setSourceSequencePosition(/*MAYBE NOT NEED THAT SET*/0);
