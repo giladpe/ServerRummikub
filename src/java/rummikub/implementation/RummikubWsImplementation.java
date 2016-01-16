@@ -1064,7 +1064,7 @@ public class RummikubWsImplementation {
                                                   invalidParameters);
         }
         
-        if (sequenceIndex <= this.currentPlayerMove.getBoardAfterMove().boardSize()) {
+        if (sequenceIndex > this.currentPlayerMove.getBoardAfterMove().boardSize()) {
             rummikubFualt.setFaultCode(null);
             rummikubFualt.setFaultString("such index of serie not exsists:" + String.valueOf(sequenceIndex));
             invalidParameters.setFaultInfo(rummikubFualt);
