@@ -1109,6 +1109,7 @@ public class RummikubWsImplementation {
         if (singleMove != null) {
             int indexToAddNewSerieToBoard = this.currentPlayerMove.getBoardAfterMove().boardSize();
 
+            
             if(indexToAddNewSerieToBoard == singleMove.getpTarget().getX()) {
                 ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
                 tileList.add(convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource())));
