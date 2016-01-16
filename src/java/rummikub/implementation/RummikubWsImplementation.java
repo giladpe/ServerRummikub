@@ -1087,6 +1087,7 @@ public class RummikubWsImplementation {
 
     private void onSwapTurnActions() {
         this.rummikubLogic.swapTurns();
+        
         initCurrentPlayerMove();
         this.eventManager.addPlayerTurnEvent(this.rummikubLogic.getCurrentPlayer().getName());
         int playerId = findPlayerId(this.rummikubLogic.getCurrentPlayer().getName()).getPlayerId();
