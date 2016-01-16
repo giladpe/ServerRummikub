@@ -101,7 +101,13 @@ public class RummikubWsImplementation {
             newEventsListForCurrPlayer = new ArrayList<>();
         }
         else { 
-            newEventsListForCurrPlayer = allEventsList.subList(eventId + 1, indexOfLastEvent);
+            newEventsListForCurrPlayer = new ArrayList<>();
+            
+            for (int i = eventId+1; i < allEventsList.size(); i++) {
+                newEventsListForCurrPlayer.add(allEventsList.get(i));
+            }
+            
+            //newEventsListForCurrPlayer = allEventsList.subList(eventId + 1, indexOfLastEvent);
         }
   
         return newEventsListForCurrPlayer;
@@ -273,8 +279,8 @@ public class RummikubWsImplementation {
             int targetSequencePosition = 1;
             int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
                     0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
-            
-            this.eventManager.addTileAddedEvent(playerId, tile, sequenceIndex, sequencePosition);
+            // i think i dont ned it here
+            //this.eventManager.addTileAddedEvent(playerId, tile, sequenceIndex, sequencePosition);
             moveTileFromHandToBoard(playerId, tile, indexLastSerie, START_OF_THE_SERIES);
             
             for (int indexSourceTile = sequencePosition ; indexSourceTile < serie.getSizeOfSerie(); indexSourceTile++) {
@@ -866,7 +872,6 @@ public class RummikubWsImplementation {
             this.eventManager.addGameStartEvent();
             this.eventManager.addPlayerTurnEvent(this.rummikubLogic.getCurrentPlayer().getName());
             int playerId = findPlayerId(this.rummikubLogic.getCurrentPlayer().getName()).getPlayerId();
-
             
             if (this.rummikubLogic.getCurrentPlayer().getIsHuman()) {
                 setTimerForPlayerResponse(playerId);

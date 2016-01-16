@@ -94,7 +94,7 @@ public class GameLogic {
     }
 
     private boolean pickOneTilesWhenIllegalMove() {
-        boolean turnSucceded = false;
+        boolean turnSucceded = true;
 
         addTileToCurrentPlayerHand();
         this.currentPlayer.setNormalMoveDone(!MOVE_DONE);
@@ -123,7 +123,7 @@ public class GameLogic {
            this.currentPlayer.setFirstMoveDone(MOVE_DONE);
         }
         else {
-            pickOneTilesWhenIllegalMove();
+            isFirstMoveValid = pickOneTilesWhenIllegalMove();
         }
         
         return isFirstMoveValid;
