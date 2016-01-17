@@ -769,6 +769,8 @@ public class RummikubWsImplementation {
             ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(currTile);
             playerDetails.getTiles().add(jaxbTile);
         }
+        
+        playerDetails.setNumberOfTiles( playerDetails.getTiles().size());
     }
     
     private ws.rummikub.Tile convertLogicTileToWsTile(Tile currTile) {
@@ -1410,9 +1412,10 @@ public class RummikubWsImplementation {
         this.rummikubLogic.removeCurrentPlayerFromTheGame();
         this.playerDetailes.remove(findPlayerId(findPlayerDetails(playerId).getName()));
         
-        if (!this.rummikubLogic.isGameOver()) {
-            this.rummikubLogic.swapTurns();
-        }
+        //I THINK THIS IS WRONG
+//        if (!this.rummikubLogic.isGameOver()) {
+//            this.rummikubLogic.swapTurns();
+//        }
         
         if (this.rummikubLogic.isReachedOneOfEndGameConditions()) {
             onGameOverActions();
