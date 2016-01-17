@@ -113,7 +113,6 @@ public class RummikubWsImplementation {
         return newEventsListForCurrPlayer;
     }
 
-    //TODO
     public String createGameFromXML(String xmlData) throws DuplicateGameName_Exception, InvalidParameters_Exception, 
                                                            InvalidXML_Exception {
         try {
@@ -140,7 +139,6 @@ public class RummikubWsImplementation {
         return this.rummikubLogic.getGameSettings().getGameName();
     }
     
-    //DONE
     public List<PlayerDetails> getPlayersDetails(String gameName) throws GameDoesNotExists_Exception {
         
         validateParamsAndThrowExceptionInIlegalCase(gameName);
@@ -150,7 +148,6 @@ public class RummikubWsImplementation {
         return playerDetailsList;
     }
 
-    //DONE
     public void createGame(String gameName, int humanPlayers, int computerizedPlayers) throws DuplicateGameName_Exception,
                                                                                               InvalidParameters_Exception {
         if (this.gameStatus == GameStatus.FINISHED) {
@@ -163,7 +160,6 @@ public class RummikubWsImplementation {
         
     }
     
-    //DONE
     public GameDetails getGameDetails(String gameName) throws GameDoesNotExists_Exception {
         validateParamsAndThrowExceptionInIlegalCase(gameName);
         
@@ -180,7 +176,6 @@ public class RummikubWsImplementation {
         return currentGameDetals;
     }
 
-    //DONE
     // <editor-fold defaultstate="collapsed" desc="TODO - WHEN WE SUPPORT MULTIPLE GAMES - NOW RETURNS CURRENT GAME NAME IN THE LIST">
     //TODO:
     //when we will support multiple game we have to add other game's name's
@@ -197,7 +192,6 @@ public class RummikubWsImplementation {
         return waitingGameList;
     }
 
-    //DONE
     public int joinGame(String gameName, String playerName) throws GameDoesNotExists_Exception, 
                                                                    InvalidParameters_Exception {
         validateParamsAndThrowExceptionInIlegalCase(gameName, playerName);
@@ -225,7 +219,6 @@ public class RummikubWsImplementation {
         return playerId;
     }
 
-    //DONE
     public PlayerDetails getPlayerDetails(int playerId) throws GameDoesNotExists_Exception, 
                                                                InvalidParameters_Exception {
         
@@ -234,7 +227,6 @@ public class RummikubWsImplementation {
         return findPlayerDetails(playerId);
     }
 
-    //TODO
     public void createSequence(int playerId, List<ws.rummikub.Tile> tiles) throws InvalidParameters_Exception {
 
 
@@ -261,7 +253,6 @@ public class RummikubWsImplementation {
         */
     }
 
-    //TODO
     public void addTile(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) 
                                                                       throws InvalidParameters_Exception {
         
@@ -296,7 +287,6 @@ public class RummikubWsImplementation {
         }
     }
     
-    //TODO
     public void takeBackTile(int playerId, int sequenceIndex, int sequencePosition) 
                                                             throws InvalidParameters_Exception {
 
@@ -316,7 +306,6 @@ public class RummikubWsImplementation {
         }
     }
 
-    //TODO
     public void moveTile(int playerId, int sourceSequenceIndex, 
                          int sourceSequencePosition, int targetSequenceIndex, 
                          int targetSequencePosition) throws InvalidParameters_Exception {
@@ -335,10 +324,8 @@ public class RummikubWsImplementation {
         this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
     }
 
-    //TODO
     public void finishTurn(int playerId) throws InvalidParameters_Exception {
 
-        //REALY?????? MAYBE WITH DIFF ID??
         
         validateParamsAndThrowExceptionInIlegalCase(playerId);
         
@@ -359,7 +346,6 @@ public class RummikubWsImplementation {
         }
     }
 
-    //TODO
     public void resign(int playerId) throws InvalidParameters_Exception {
        //means player cant swap turn, he has to take back all his tiles?????
         
