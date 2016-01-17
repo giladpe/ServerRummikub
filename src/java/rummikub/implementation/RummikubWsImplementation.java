@@ -264,7 +264,7 @@ public class RummikubWsImplementation {
         Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex);
         final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie() - INDEX_NORMALIZATION;
         
-        if (sequencePosition > START_OF_THE_SERIES && sequencePosition < END_OF_THE_SERIES ) {
+        if (sequencePosition >= START_OF_THE_SERIES && sequencePosition <= END_OF_THE_SERIES ) {
             //split case
             ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
             tileList.add(tile);
@@ -301,7 +301,7 @@ public class RummikubWsImplementation {
         
         if (dealWithSingleMoveResualt(singleMove)) {
             PlayerDetails playerDetails = findPlayerDetails(playerId);
-            playerDetails.getTiles().add(jaxbTile);
+            initPlayerDetailsTileList(playerDetails, this.currentPlayerMove.getHandAfterMove());
             this.eventManager.addTakeBackTileEvent(playerId, sequenceIndex, sequencePosition);
         }
     }
@@ -315,7 +315,7 @@ public class RummikubWsImplementation {
         validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
         
         setTimerForPlayerResponse(playerId);
-
+   
         Point source = new Point(sourceSequenceIndex, sourceSequencePosition);
         Point target = new Point(targetSequenceIndex, targetSequencePosition);
 
@@ -326,7 +326,6 @@ public class RummikubWsImplementation {
 
     public void finishTurn(int playerId) throws InvalidParameters_Exception {
 
-        
         validateParamsAndThrowExceptionInIlegalCase(playerId);
         
         this.timer.cancel();
@@ -336,7 +335,7 @@ public class RummikubWsImplementation {
             revertTheTurn(playerId);
         }
         
-        initPlayerDetailsTileList(findPlayerDetails(playerId), this.rummikubLogic.getCurrentPlayer());
+        initPlayerDetailsTileList(findPlayerDetails(playerId), this.rummikubLogic.getCurrentPlayer().getListPlayerTiles());
         
         if (this.rummikubLogic.isReachedOneOfEndGameConditions()) {
             onGameOverActions();
@@ -741,16 +740,16 @@ public class RummikubWsImplementation {
         playerDetails.setType(playerType);
         
         if(withTilesList) {
-            initPlayerDetailsTileList(playerDetails, currPlayer);
+            initPlayerDetailsTileList(playerDetails, currPlayer.getListPlayerTiles());
         }
         
         return playerDetails;
     }
     
-    private void initPlayerDetailsTileList(PlayerDetails playerDetails, Player currPlayer) {
+    private void initPlayerDetailsTileList(PlayerDetails playerDetails, ArrayList<Tile> logicTileList) {
         playerDetails.getTiles().clear();
 
-        for (Tile currTile : currPlayer.getListPlayerTiles()) {
+        for (Tile currTile : logicTileList) {
             ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(currTile);
             playerDetails.getTiles().add(jaxbTile);
         }
@@ -1011,7 +1010,7 @@ public class RummikubWsImplementation {
         
         this.eventManager.addRevertEvent(playerId);
         PlayerDetails currentPlayerDetails = findPlayerDetails(playerId);
-        initPlayerDetailsTileList(currentPlayerDetails, this.rummikubLogic.getCurrentPlayer());
+        initPlayerDetailsTileList(currentPlayerDetails, this.currentPlayerMove.getHandAfterMove());
         
         for (Serie serie : lastTurnBoard) {
             for (Tile logicTile : serie.getSerieOfTiles()) {
@@ -1420,7 +1419,7 @@ public class RummikubWsImplementation {
 
         if (dealWithSingleMoveResualt(singleMove)) {
             PlayerDetails playerDetails = findPlayerDetails(playerId);
-            playerDetails.getTiles().remove(IndexInHand);
+            initPlayerDetailsTileList(playerDetails, this.currentPlayerMove.getHandAfterMove());
         }
     }
     
