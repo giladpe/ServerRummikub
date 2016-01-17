@@ -367,7 +367,6 @@ public class RummikubWsImplementation {
         this.timer.cancel();
         //finish wrtiting this method - used with timer and here
         doWhenPlayerResign(playerId);
-
     }
     
     //********** Public functions used by the Web Service - END **********/
