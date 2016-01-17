@@ -296,8 +296,6 @@ public class RummikubWsImplementation {
         
         Point source = new Point(sequenceIndex, sequencePosition);
         SingleMove singleMove = new SingleMove(source, SingleMove.MoveType.BOARD_TO_HAND);
-        Tile logicTile  = this.currentPlayerMove.getBoardAfterMove().getSpecificTile(sequenceIndex, sequencePosition);
-        ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(logicTile);
         
         if (dealWithSingleMoveResualt(singleMove)) {
             PlayerDetails playerDetails = findPlayerDetails(playerId);
