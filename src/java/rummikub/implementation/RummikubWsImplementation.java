@@ -262,9 +262,11 @@ public class RummikubWsImplementation {
         //we know the params are VALID
         
         Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex);
-        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie() - INDEX_NORMALIZATION;
+        //goes with old version
+        //final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie() - INDEX_NORMALIZATION;
+        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
         
-        if (sequencePosition >= START_OF_THE_SERIES && sequencePosition <= END_OF_THE_SERIES ) {
+        if (!isPositionAtStartOrEndOfSeries(sequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
             //split case
             ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
             tileList.add(tile);
@@ -274,14 +276,17 @@ public class RummikubWsImplementation {
 
             moveTileFromHandToBoard(playerId, tile, indexLastSerie, START_OF_THE_SERIES);
             this.eventManager.addCreateSequenceEvent(playerId, tileList);
-            int before = serie.getSizeOfSerie();
-            int after;
 
-            for (int indexSourcePosition = sequencePosition ; indexSourcePosition < serie.getSizeOfSerie(); indexSourcePosition++) {
-                moveTile(playerId, sequenceIndex, indexSourcePosition, indexLastSerie, targetSequencePosition);
-                targetSequencePosition++;
-                after = serie.getSizeOfSerie();
+            int numOfIterations = serie.getSizeOfSerie() - sequencePosition;
+            
+            for (int i = targetSequencePosition; i <= numOfIterations; i++) {
+                moveTile(playerId, sequenceIndex, sequencePosition, indexLastSerie, targetSequencePosition);
             }
+            
+//            for (int indexSourcePosition = sequencePosition ; indexSourcePosition < serie.getSizeOfSerie(); indexSourcePosition++) {
+//                moveTile(playerId, sequenceIndex, indexSourcePosition, indexLastSerie, targetSequencePosition);
+//                targetSequencePosition++;
+//            }
         }
         else {
             //adding tile to end or start of serie
@@ -359,7 +364,9 @@ public class RummikubWsImplementation {
         this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
 
         Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(targetSequenceIndex);
-        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie() - INDEX_NORMALIZATION;
+        //goes with old version
+        //final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie() - INDEX_NORMALIZATION;
+        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
 
 //        final int END_OF_THE_BOARD = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 0 : this.currentPlayerMove.getBoardAfterMove().boardSize() - INDEX_NORMALIZATION;
         
@@ -371,17 +378,27 @@ public class RummikubWsImplementation {
 //            this.eventManager.addCreateSequenceEvent(playerId, tileList);
 //        }
         
-//if (targetSequencePosition == START_OF_THE_SERIES || targetSequencePosition > END_OF_THE_SERIES) {
-//        if (targetSequencePosition >= START_OF_THE_SERIES && targetSequencePosition <= END_OF_THE_SERIES ) {
-//            //split case
-//            ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
-//            //Tile logicTile = this.currentPlayerMove.getBoardAfterMove().getSpecificTile(targetSequenceIndex, targetSequencePosition);
-//            //tileList.add(convertLogicTileToWsTile(logicTile));
-//            boolean isAlreadyAdded = false;
-//            int targetSequencePositionInNewSeries = 0;
-//            int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
-//                    0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
-//
+        if (isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
+            //split case
+            ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
+            //Tile logicTile = this.currentPlayerMove.getBoardAfterMove().getSpecificTile(targetSequenceIndex, targetSequencePosition);
+            //tileList.add(convertLogicTileToWsTile(logicTile));
+            boolean isAlreadyAdded = false;
+            int targetSequencePositionInNewSeries = 0;
+            int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
+                    0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
+            
+            int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
+
+            
+            for (int i = targetSequencePositionInNewSeries ; i < numOfIterations; i++) {
+                if (!isAlreadyAdded) {
+                    this.eventManager.addCreateSequenceEvent(playerId, tileList);
+                    isAlreadyAdded = true;
+                }
+                moveTile(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i);
+            }
+
 //            for (int targetSequancePositionInNewSeries = targetSequencePosition ; targetSequancePositionInNewSeries < serie.getSizeOfSerie(); targetSequancePositionInNewSeries++) {
 //                if (!isAlreadyAdded) {
 //                    this.eventManager.addCreateSequenceEvent(playerId, tileList);
@@ -390,7 +407,7 @@ public class RummikubWsImplementation {
 //                moveTile(playerId, targetSequenceIndex, targetSequancePositionInNewSeries, indexLastSerie, targetSequencePositionInNewSeries);
 //                targetSequencePositionInNewSeries++;
 //            }
-//        }
+        }
 
             
       
@@ -1209,6 +1226,11 @@ public class RummikubWsImplementation {
         this.isLoadedFromXML = !LOADED_FROM_XML;
         this.timer = new Timer(DEAMON_THREAD);
         this.eventManager.clearAllEvents();
+    }
+
+    private boolean isPositionAtStartOrEndOfSeries(int sequencePosition, final int START_OF_THE_SERIES,final int END_OF_THE_SERIES) {
+         //sequencePosition >= START_OF_THE_SERIES && sequencePosition <= END_OF_THE_SERIES 
+        return sequencePosition == START_OF_THE_SERIES || sequencePosition == END_OF_THE_SERIES;
     }
 
     
