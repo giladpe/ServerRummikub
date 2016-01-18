@@ -258,7 +258,7 @@ public class GameLogic {
         
         if (!foundWinner){
 
-            this.isTie = this.gameHeap.isEmptyHeap() && !isAtleastOnePlayerMoved();
+            this.isTie = this.gameHeap.isEmptyHeap() && !isAtleastOnePlayerMoved() || isOnlyOnePlayerLeft();
             if (this.isTie){
                 this.isGameOver = this.isTie;
             }

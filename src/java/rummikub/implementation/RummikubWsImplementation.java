@@ -1521,23 +1521,31 @@ public class RummikubWsImplementation {
     
     private void doWhenPlayerResign(int playerId) {
         this.timer.cancel();
-        revertTheTurn(playerId);
-        this.eventManager.addResignEvent(playerId);
-        
         this.rummikubLogic.removeCurrentPlayerFromTheGame();
-        findPlayerDetails(playerId).setStatus(PlayerStatus.RETIRED);
-        
-        //I THINK THIS IS WRONG
-//        if (!this.rummikubLogic.isGameOver()) {
-//            this.rummikubLogic.swapTurns();
-//        }
-        
-        if (this.rummikubLogic.isReachedOneOfEndGameConditions()) {
-            onGameOverActions();
+
+        if (this.gameStatus == GameStatus.WAITING) {
+            this.playerDetailes.remove(findPlayerId(this.rummikubLogic.getCurrentPlayer().getName()));
+            this.rummikubLogic.getGameOriginalInputedSettings().removePlayerFromGame(this.rummikubLogic.getCurrentPlayer().getIsHuman());
         }
         else {
-            onSwapTurnActions();
+            revertTheTurn(playerId);
+            this.eventManager.addResignEvent(playerId);
+
+            findPlayerDetails(playerId).setStatus(PlayerStatus.RETIRED);
+
+            //I THINK THIS IS WRONG
+    //        if (!this.rummikubLogic.isGameOver()) {
+    //            this.rummikubLogic.swapTurns();
+    //        }
+
+            if (this.rummikubLogic.isReachedOneOfEndGameConditions()) {
+                onGameOverActions();
+            }
+            else {
+                onSwapTurnActions();
+            }  
         }
+
     }
     
     private void moveTileFromHandToBoard(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
