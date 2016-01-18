@@ -210,7 +210,14 @@ public class RummikubWsImplementation {
 
         //indexOfPlayerInHisGame = indexOfLastEvent();
         //playerId = PlayerId.getPlayerId(playerName, gameName, indexOfPlayerInHisGame);
-
+//        if (this.isLoadedFromXML) {
+//                  PlayerId id = findPlayerId(newPlayer.getName());
+//        
+//            if (this.playerDetailes.containsKey(id)) {
+//                checkCaseOfPlayerAlreadyExsists(playerName);
+//            }
+//        }
+  
         playerId = addPlayerToPlayerDetailesList(newPlayer, PlayerStatus.JOINED, WITH_TILE_LIST);
 
         //finish wrtining that method
@@ -280,7 +287,7 @@ public class RummikubWsImplementation {
             int numOfIterations = serie.getSizeOfSerie() - sequencePosition;
             
             for (int i = targetSequencePosition; i <= numOfIterations; i++) {
-                moveTile(playerId, sequenceIndex, sequencePosition, indexLastSerie, targetSequencePosition);
+                moveTile(playerId, sequenceIndex, sequencePosition, indexLastSerie, i);
             }
             
 //            for (int indexSourcePosition = sequencePosition ; indexSourcePosition < serie.getSizeOfSerie(); indexSourcePosition++) {
@@ -440,7 +447,6 @@ public class RummikubWsImplementation {
        //means player cant swap turn, he has to take back all his tiles?????
         
         validateParamsAndThrowExceptionInIlegalCase(playerId);
-        this.timer.cancel();
         //finish wrtiting this method - used with timer and here
         doWhenPlayerResign(playerId);
     }
@@ -1490,6 +1496,8 @@ public class RummikubWsImplementation {
     }
     
     private void doWhenPlayerResign(int playerId) {
+        this.timer.cancel();
+        revertTheTurn(playerId);
         this.eventManager.addResignEvent(playerId);
         
         this.rummikubLogic.removeCurrentPlayerFromTheGame();
