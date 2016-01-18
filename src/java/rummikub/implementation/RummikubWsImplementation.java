@@ -425,8 +425,8 @@ public class RummikubWsImplementation {
         this.eventManager.addFinishTurnEvent(playerId);
 
         if (!this.rummikubLogic.playSingleTurn(this.currentPlayerMove)) {
-            revertTheTurn(playerId);
             this.eventManager.addRevertEvent(playerId);
+            revertTheTurn(playerId);
         }
         
         initPlayerDetailsTileList(findPlayerDetails(playerId), this.rummikubLogic.getCurrentPlayer().getListPlayerTiles());
