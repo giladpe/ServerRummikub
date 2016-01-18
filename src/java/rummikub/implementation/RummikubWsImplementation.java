@@ -428,6 +428,12 @@ public class RummikubWsImplementation {
             revertTheTurn(playerId);
             this.eventManager.addRevertEvent(playerId);
         }
+        else{ 
+            PlayerDetails playerDetails = findPlayerDetails(playerId);
+            if (!playerDetails.isPlayedFirstSequence()) {
+                playerDetails.setPlayedFirstSequence(true);
+            }
+        }
         
         initPlayerDetailsTileList(findPlayerDetails(playerId), this.rummikubLogic.getCurrentPlayer().getListPlayerTiles());
         
