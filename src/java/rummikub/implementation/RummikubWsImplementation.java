@@ -205,11 +205,7 @@ public class RummikubWsImplementation {
             newPlayer = new HumanPlayer(playerName);
             this.rummikubLogic.addNewHumanPlayer(newPlayer);
         }
-
-        //before change playerDetails from list to map
-
-        //indexOfPlayerInHisGame = indexOfLastEvent();
-        //playerId = PlayerId.getPlayerId(playerName, gameName, indexOfPlayerInHisGame);
+        
 //        if (this.isLoadedFromXML) {
 //                  PlayerId id = findPlayerId(newPlayer.getName());
 //        
@@ -899,12 +895,40 @@ public class RummikubWsImplementation {
 
     private List<PlayerDetails> makePlayerDetailsListWithoutTilesList() {
         List<PlayerDetails> newPlayerDetailsList = new ArrayList<>();
-
-        for (PlayerDetails playerDetails : this.playerDetailes.values()) {
-            PlayerDetails newPlayerDetails = copyPlayerDetails(playerDetails, !WITH_TILE_LIST);
-            newPlayerDetailsList.add(newPlayerDetails);
+        if (this.isLoadedFromXML) {
+            for (Player player : this.rummikubLogic.getPlayers()) {
+                PlayerDetails newPlayerDetails = copyPlayerDetails(player);
+                newPlayerDetailsList.add(newPlayerDetails);
+            }
+        } else {
+            for (PlayerDetails playerDetails : this.playerDetailes.values()) {
+                PlayerDetails newPlayerDetails = copyPlayerDetails(playerDetails, !WITH_TILE_LIST);
+                newPlayerDetailsList.add(newPlayerDetails);
+            }
         }
+
         return newPlayerDetailsList;
+    }
+    
+    private PlayerDetails copyPlayerDetails(Player player) {
+        PlayerDetails playerDetails = new PlayerDetails();
+
+        playerDetails.setName(player.getName());
+        playerDetails.setNumberOfTiles(player.getListPlayerTiles().size());
+        playerDetails.setPlayedFirstSequence(player.isFirstMoveDone());
+        PlayerStatus playerStatus = this.playerDetailes.get(findPlayerId(player.getName())).getStatus();
+        //if player didnt joind the his status is null
+        playerDetails.setStatus(playerStatus);
+        PlayerType playerType;
+        if (player.getIsHuman()) {
+            playerType = PlayerType.HUMAN;
+        }
+        else {
+            playerType = PlayerType.COMPUTER;
+        }
+        playerDetails.setType(playerType);
+        
+        return playerDetails;
     }
 
     private PlayerDetails copyPlayerDetails(PlayerDetails playerDetailsToCopy, boolean withTilesList) {
@@ -1501,7 +1525,7 @@ public class RummikubWsImplementation {
         this.eventManager.addResignEvent(playerId);
         
         this.rummikubLogic.removeCurrentPlayerFromTheGame();
-        this.playerDetailes.remove(findPlayerId(findPlayerDetails(playerId).getName()));
+        findPlayerDetails(playerId).setStatus(PlayerStatus.RETIRED);
         
         //I THINK THIS IS WRONG
 //        if (!this.rummikubLogic.isGameOver()) {
