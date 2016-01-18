@@ -381,7 +381,7 @@ public class RummikubWsImplementation {
 //            this.eventManager.addCreateSequenceEvent(playerId, tileList);
 //        }
         
-        if (isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
+        if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
             //split case
             ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
             //Tile logicTile = this.currentPlayerMove.getBoardAfterMove().getSpecificTile(targetSequenceIndex, targetSequencePosition);
