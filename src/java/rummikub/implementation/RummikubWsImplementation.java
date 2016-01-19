@@ -1044,10 +1044,6 @@ public class RummikubWsImplementation {
             if(!this.isLoadedFromXML) {
                 this.rummikubLogic.shufflePlayersBeforeStartingOnlineGame();
             }
-            
-            if (this.isLoadedFromXML) {
-                createEventsAcordingToTheCurrentLogicBoard(NOT_RELATED_TO_ANY_PLAYER);
-            }
              
             initCurrentPlayerMove();
             
@@ -1055,13 +1051,17 @@ public class RummikubWsImplementation {
             this.eventManager.addPlayerTurnEvent(this.rummikubLogic.getCurrentPlayer().getName());
             int playerId = findPlayerId(this.rummikubLogic.getCurrentPlayer().getName()).getPlayerId();
             
+            if (this.isLoadedFromXML) {
+                createEventsAcordingToTheCurrentLogicBoard(NOT_RELATED_TO_ANY_PLAYER);
+            }
+            
             if (this.rummikubLogic.getCurrentPlayer().getIsHuman()) {
                 setTimerForPlayerResponse(playerId);
             }
             else {
-                try {
-                    Thread.sleep(DELAY_FOR_COMPUTER_MOVE);
-                } catch (InterruptedException ex) {}
+//                try {
+//                    Thread.sleep(DELAY_FOR_COMPUTER_MOVE);
+//                } catch (InterruptedException ex) {}
 
                 onComputerTurn(playerId);
             }
