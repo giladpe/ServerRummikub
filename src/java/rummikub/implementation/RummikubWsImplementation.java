@@ -645,7 +645,9 @@ public class RummikubWsImplementation {
         checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters(playerName);
         
         if (this.isLoadedFromXML) {
-            if (!this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName)) {
+            PlayerDetails playerDetails = this.playerDetailes.get(findPlayerId(playerName));
+            
+            if (!this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName) && playerDetails.getStatus() == PlayerStatus.JOINED) {
                 InvalidParameters invalidParameters = new InvalidParameters();
                 RummikubFault rummikubFualt = new RummikubFault();
 
@@ -1286,29 +1288,28 @@ public class RummikubWsImplementation {
     }
 
     private void addEventsAfterComputerMove(SingleMove singleMove, int playerId) {
-        int indexToAddNewSerieToBoard = this.currentPlayerMove.getBoardAfterMove().boardSize();
+        if (singleMove != IS_FINISHED_TURN) {
+            int indexToAddNewSerieToBoard = this.currentPlayerMove.getBoardAfterMove().boardSize();
 
-        if(indexToAddNewSerieToBoard == singleMove.getpTarget().getX()) {
-            ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
-            tileList.add(convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource())));
-            try{
-                createSequence(playerId, tileList);
-            } 
-            catch (InvalidParameters_Exception ex) {}
-            catch (Exception ex) {
-                currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
+            if (indexToAddNewSerieToBoard == singleMove.getpTarget().getX()) {
+                ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
+                tileList.add(convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource())));
+                try {
+                    createSequence(playerId, tileList);
+                } catch (InvalidParameters_Exception ex) {
+                } catch (Exception ex) {
+                    currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
+                }
+            } else {
+                ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource()));
+                try {
+                    addTile(playerId, jaxbTile, singleMove.getpTarget().x, singleMove.getpTarget().y);
+                } catch (InvalidParameters_Exception ex) {
+                } catch (Exception ex) {
+                    currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
+                }
             }
         }
-        else {
-            ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource()));
-            try{
-                addTile(playerId, jaxbTile, singleMove.getpTarget().x, singleMove.getpTarget().y);
-            } 
-            catch (InvalidParameters_Exception ex) {}
-            catch (Exception ex) {
-                currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
-            }
-        }    
     }
     
     private void initGameComponetsToPrepareForNextGame() {
@@ -1672,9 +1673,7 @@ public class RummikubWsImplementation {
             while (isComputerPlayer) {
                 SingleMove singleMove = computerPlayerMakesSingleMove();
                 
-                if(singleMove != IS_FINISHED_TURN) {
-                    addEventsAfterComputerMove(singleMove, playerId);
-                }
+                addEventsAfterComputerMove(singleMove, playerId);
 
                 try {
                     Thread.sleep(DELAY_FOR_COMPUTER_MOVE);
