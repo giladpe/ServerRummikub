@@ -836,7 +836,8 @@ public class RummikubWsImplementation {
 
     private void initPlayerDetailesListFromFile() {
         this.rummikubLogic.getPlayers().stream().forEach((currPlayer) -> {
-            addPlayerToPlayerDetailesList(currPlayer,null, WITH_TILE_LIST);
+            PlayerStatus playerStatus = currPlayer.getIsHuman()? null : PlayerStatus.JOINED;
+            addPlayerToPlayerDetailesList(currPlayer, playerStatus, WITH_TILE_LIST);
         });
         //for (Player currPlayer : this.rummikubLogic.getPlayers()) {
             //addPlayerToPlayerDetailesList(currPlayer);
