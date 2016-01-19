@@ -123,6 +123,7 @@ public class RummikubWsImplementation {
             this.rummikubLogic = new GameLogic();
             this.rummikubLogic.initGameFromFile(JaxBXmlParser.getPlayerArray(), JaxBXmlParser.getBoard(),
                                            JaxBXmlParser.getCurrPlayer(), JaxBXmlParser.getGameName());
+            initPlayerDetailesListFromFile();
             initCurrentPlayerMove();
                 
         } catch (SAXException | IOException ex) {
@@ -200,10 +201,15 @@ public class RummikubWsImplementation {
 
         if (this.isLoadedFromXML){
             newPlayer = this.rummikubLogic.getPlayerByName(playerName);
+            PlayerId playerServerId = findPlayerId(newPlayer.getName());
+            PlayerDetails playerDetails = this.playerDetailes.get(playerServerId); 
+            playerId = playerServerId.getPlayerId();
+            playerDetails.setStatus(PlayerStatus.JOINED);
         }
         else {
             newPlayer = new HumanPlayer(playerName);
             this.rummikubLogic.addNewHumanPlayer(newPlayer);
+            playerId = addPlayerToPlayerDetailesList(newPlayer, PlayerStatus.JOINED, WITH_TILE_LIST);
         }
         
 //        if (this.isLoadedFromXML) {
@@ -214,7 +220,6 @@ public class RummikubWsImplementation {
 //            }
 //        }
   
-        playerId = addPlayerToPlayerDetailesList(newPlayer, PlayerStatus.JOINED, WITH_TILE_LIST);
 
         //finish wrtining that method
         updateGameStatus();
@@ -785,7 +790,15 @@ public class RummikubWsImplementation {
             //addPlayerToPlayerDetailesList(currPlayer);
         //}
     }
-    
+
+    private void initPlayerDetailesListFromFile() {
+        this.rummikubLogic.getPlayers().stream().forEach((currPlayer) -> {
+            addPlayerToPlayerDetailesList(currPlayer,null, WITH_TILE_LIST);
+        });
+        //for (Player currPlayer : this.rummikubLogic.getPlayers()) {
+            //addPlayerToPlayerDetailesList(currPlayer);
+        //}
+    } 
     //    USED WHEN THE MEMBER "this.playerDetailesList" is ArrayList type
 //
 //    private void addPlayerToPlayerDetailesList(Player currPlayer) {
