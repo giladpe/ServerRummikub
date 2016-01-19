@@ -647,7 +647,7 @@ public class RummikubWsImplementation {
         if (this.isLoadedFromXML) {
             PlayerDetails playerDetails = this.playerDetailes.get(findPlayerId(playerName));
             
-            if (!this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName) && playerDetails.getStatus() == PlayerStatus.JOINED) {
+            if (!this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName) || playerDetails.getStatus() == PlayerStatus.JOINED) {
                 InvalidParameters invalidParameters = new InvalidParameters();
                 RummikubFault rummikubFualt = new RummikubFault();
 
