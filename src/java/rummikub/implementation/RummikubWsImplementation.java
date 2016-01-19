@@ -38,6 +38,8 @@ public class RummikubWsImplementation {
     private static final int START_OF_THE_SERIES = 0;
     private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(2);
     private static final long DELAY_FOR_COMPUTER_MOVE = 1500;
+    private static final int NOT_RELATED_TO_ANY_PLAYER = -1;
+    private static final String CREATED_BY_FILE = "";
 
     private static final int DISABLED_TIMER = 0;
 
@@ -116,7 +118,9 @@ public class RummikubWsImplementation {
     public String createGameFromXML(String xmlData) throws DuplicateGameName_Exception, InvalidParameters_Exception, 
                                                            InvalidXML_Exception {
         try {
-            
+            if (this.gameStatus == GameStatus.FINISHED) {
+                initGameComponetsToPrepareForNextGame();
+            }            
             JaxBXmlParser.loadSettingsFromXml(xmlData);
 
             checkCaseOfDuplicateGameName(JaxBXmlParser.getGameName());
@@ -126,6 +130,7 @@ public class RummikubWsImplementation {
                                            JaxBXmlParser.getCurrPlayer(), JaxBXmlParser.getGameName());
             initPlayerDetailesListFromFile();
             initCurrentPlayerMove();
+            createEventsAcordingToTheCurrentLogicBoard(NOT_RELATED_TO_ANY_PLAYER);
                 
         } catch (SAXException | IOException ex) {
             InvalidXML invalidXML = new InvalidXML();
@@ -293,10 +298,7 @@ public class RummikubWsImplementation {
 //                moveTile(playerId, sequenceIndex, sequencePosition, indexLastSerie, i);
                 moveTileFromBoardToBoard(playerId, sequenceIndex, sequencePosition, indexLastSerie, i);
             }
-//            for (int indexSourcePosition = sequencePosition ; indexSourcePosition < serie.getSizeOfSerie(); indexSourcePosition++) {
-//                moveTile(playerId, sequenceIndex, indexSourcePosition, indexLastSerie, targetSequencePosition);
-//                targetSequencePosition++;
-//            }
+            
         }
         else {
             //adding tile to end or start of serie
@@ -1157,21 +1159,11 @@ public class RummikubWsImplementation {
         return isLegalMoveDone;
     }
 
-    private void revertTheTurn(int playerId) {
-        ArrayList<Serie> lastTurnBoard = this.rummikubLogic.getGameBoard().getListOfSerie();
-        ArrayList<ws.rummikub.Tile> jaxbTilesList = new ArrayList<>();
-        
+    private void revertTheTurn(int playerId) {  
         PlayerDetails currentPlayerDetails = findPlayerDetails(playerId);
         initPlayerDetailsTileList(currentPlayerDetails, this.rummikubLogic.getCurrentPlayer().getListPlayerTiles());
         
-        for (Serie serie : lastTurnBoard) {
-            for (Tile logicTile : serie.getSerieOfTiles()) {
-                jaxbTilesList.add(convertLogicTileToWsTile(logicTile));
-            }
-            
-            this.eventManager.addCreateSequenceEvent(playerId, jaxbTilesList);
-            jaxbTilesList.clear();
-        }
+        createEventsAcordingToTheCurrentLogicBoard(playerId);
     }
 
     private void cheackCaseTileLocationIndexesAreInvalid(int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
@@ -1315,6 +1307,20 @@ public class RummikubWsImplementation {
         }
         
         return isAllPlayersJoin;
+    }
+
+    private void createEventsAcordingToTheCurrentLogicBoard(int playerId) {
+        ArrayList<Serie> lastTurnBoard = this.rummikubLogic.getGameBoard().getListOfSerie();
+        ArrayList<ws.rummikub.Tile> jaxbTilesList = new ArrayList<>();
+        
+        for (Serie serie : lastTurnBoard) {
+            for (Tile logicTile : serie.getSerieOfTiles()) {
+                jaxbTilesList.add(convertLogicTileToWsTile(logicTile));
+            }
+            
+            this.eventManager.addCreateSequenceEvent(playerId, jaxbTilesList);
+            jaxbTilesList.clear();
+        }
     }
 
     
@@ -1462,7 +1468,13 @@ public class RummikubWsImplementation {
                         0 : currentPlayerMove.getBoardAfterMove().boardSize();
             
             newSequenceCtearedEvent.setId(indexForNewtEvent());
-            newSequenceCtearedEvent.setPlayerName(findPlayerDetails(playerId).getName());
+            
+            if(playerId == NOT_RELATED_TO_ANY_PLAYER) {
+                newSequenceCtearedEvent.setPlayerName(CREATED_BY_FILE);
+            }
+            else {
+                newSequenceCtearedEvent.setPlayerName(findPlayerDetails(playerId).getName());
+            }
             newSequenceCtearedEvent.setTimeout((int)TIMER_DELAY);
             tiles.stream().forEach((tile) -> { newSequenceCtearedEvent.getTiles().add(tile); });
             //newSequenceCtearedEvent.setSourceSequenceIndex(/*MAYBE NOT NEED THAT SET*/0);
