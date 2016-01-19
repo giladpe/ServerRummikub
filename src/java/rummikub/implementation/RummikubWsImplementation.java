@@ -1312,7 +1312,6 @@ public class RummikubWsImplementation {
         else {
             currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
         }
-        
     }
     
     private void initGameComponetsToPrepareForNextGame() {
