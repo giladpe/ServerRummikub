@@ -266,11 +266,7 @@ public class RummikubWsImplementation {
         validateParamsAndThrowExceptionInIlegalCase(playerId, tile, sequenceIndex, sequencePosition);
         
         setTimerForPlayerResponse(playerId);
-        //we know the params are VALID
-        
         Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex);
-        //goes with old version
-        //final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie() - INDEX_NORMALIZATION;
         final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
         
         if (!isPositionAtStartOrEndOfSeries(sequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
