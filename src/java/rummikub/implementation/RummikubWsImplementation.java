@@ -1150,13 +1150,7 @@ public class RummikubWsImplementation {
             
             this.eventManager.addCreateSequenceEvent(playerId, jaxbTilesList);
             jaxbTilesList.clear();
-            //this.eventManager.addCreateSequenceEvent(playerId,/*not used right now*/ null);
         }
-                
-        
-
-        //THIS IS PROBBLY WRONG PLACE FOR IT
-//        onSwapTurnActions();
     }
 
     private void cheackCaseTileLocationIndexesAreInvalid(int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
@@ -1230,7 +1224,6 @@ public class RummikubWsImplementation {
     private void addEventsAfterComputerMove(SingleMove singleMove, int playerId) {
         if (singleMove != null) {
             int indexToAddNewSerieToBoard = this.currentPlayerMove.getBoardAfterMove().boardSize();
-
             
             if(indexToAddNewSerieToBoard == singleMove.getpTarget().getX()) {
                 ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
@@ -1261,7 +1254,6 @@ public class RummikubWsImplementation {
         this.rummikubLogic = null;
         this.serieGenerator = new SeriesGenerator();
         this.newMoveGenerator = new ComputerSingleMoveGenerator();
-        //private PlayersMove currentPlayerMove;
 
         this.playerDetailes.clear();
         this.gameStatus = GameStatus.WAITING;
@@ -1271,7 +1263,6 @@ public class RummikubWsImplementation {
     }
 
     private boolean isPositionAtStartOrEndOfSeries(int sequencePosition, final int START_OF_THE_SERIES,final int END_OF_THE_SERIES) {
-         //sequencePosition >= START_OF_THE_SERIES && sequencePosition <= END_OF_THE_SERIES 
         return sequencePosition == START_OF_THE_SERIES || sequencePosition == END_OF_THE_SERIES;
     }
 
@@ -1282,7 +1273,6 @@ public class RummikubWsImplementation {
         SingleMove singleMove = new SingleMove(target, source, SingleMove.MoveType.BOARD_TO_BOARD);
         dealWithSingleMoveResualt(singleMove);
         this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
-
     }
 
     
@@ -1555,11 +1545,6 @@ public class RummikubWsImplementation {
 
             findPlayerDetails(playerId).setStatus(PlayerStatus.RETIRED);
 
-            //I THINK THIS IS WRONG
-    //        if (!this.rummikubLogic.isGameOver()) {
-    //            this.rummikubLogic.swapTurns();
-    //        }
-
             if (this.rummikubLogic.isReachedOneOfEndGameConditions()) {
                 onGameOverActions();
             }
@@ -1650,7 +1635,7 @@ public class RummikubWsImplementation {
     }
 }
 
-// <editor-fold defaultstate="collapsed" desc="user-description">
+// <editor-fold defaultstate="collapsed" desc="sample of editor fold command">
 // </editor-fold>
 
 // <editor-fold defaultstate="collapsed" desc="Web service Info">
