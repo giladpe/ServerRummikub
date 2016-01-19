@@ -36,8 +36,8 @@ public class RummikubWsImplementation {
     private static final boolean DEAMON_THREAD = true;
     private static int INDEX_NORMALIZATION = 1;
     private static final int START_OF_THE_SERIES = 0;
-    private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(20);
-    private static final long DELAY_FOR_COMPUTER_MOVE = 1750;
+    private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(2);
+    private static final long DELAY_FOR_COMPUTER_MOVE = 1500;
 
     private static final int DISABLED_TIMER = 0;
 
@@ -1007,6 +1007,10 @@ public class RummikubWsImplementation {
                 setTimerForPlayerResponse(playerId);
             }
             else {
+                try {
+                    Thread.sleep(DELAY_FOR_COMPUTER_MOVE);
+                } catch (InterruptedException ex) {}
+
                 onComputerTurn(playerId);
             }
         }
@@ -1222,6 +1226,10 @@ public class RummikubWsImplementation {
             setTimerForPlayerResponse(playerId);
         }
         else {
+            try {
+                Thread.sleep(DELAY_FOR_COMPUTER_MOVE);
+            } catch (InterruptedException ex) {}
+            
             onComputerTurn(playerId);
         }
     }
@@ -1244,7 +1252,9 @@ public class RummikubWsImplementation {
                     createSequence(playerId, tileList);
                 } 
                 catch (InvalidParameters_Exception ex) {}
-                catch (Exception ex) {}
+                catch (Exception ex) {
+                    currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
+                }
             }
             else {
                 ws.rummikub.Tile jaxbTile = convertLogicTileToWsTile(this.currentPlayerMove.getHandAfterMove().get(singleMove.getnSource()));
@@ -1252,7 +1262,9 @@ public class RummikubWsImplementation {
                     addTile(playerId, jaxbTile, singleMove.getpTarget().x, singleMove.getpTarget().y);
                 } 
                 catch (InvalidParameters_Exception ex) {}
-                catch (Exception ex) {}
+                catch (Exception ex) {
+                    currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
+                }
             }    
         }
         else {
