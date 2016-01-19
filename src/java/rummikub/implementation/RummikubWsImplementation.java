@@ -978,9 +978,8 @@ public class RummikubWsImplementation {
 
 
     private void updateGameStatus() {
-        int currGameNumberOfHumanPlayersNeeded = this.rummikubLogic.getGameOriginalInputedSettings().getNumOfHumanPlayers();
 
-        if (this.rummikubLogic.getNumberOfJoinedHumanPlayers() == currGameNumberOfHumanPlayersNeeded) {
+        if (allPlayersJoinedGame()) {
             this.gameStatus = GameStatus.ACTIVE;
 
             //walk throw details list and set status to active????
@@ -1286,6 +1285,19 @@ public class RummikubWsImplementation {
         SingleMove singleMove = new SingleMove(target, source, SingleMove.MoveType.BOARD_TO_BOARD);
         dealWithSingleMoveResualt(singleMove);
         this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+    }
+
+    private boolean allPlayersJoinedGame() {
+        int currGameNumberOfHumanPlayersNeeded = this.rummikubLogic.getGameOriginalInputedSettings().getNumOfHumanPlayers();
+        boolean isAllPlayersJoin = this.rummikubLogic.getNumberOfJoinedHumanPlayers() == currGameNumberOfHumanPlayersNeeded;
+
+        if (isAllPlayersJoin) {
+            for (PlayerDetails currPlayerDetails : this.playerDetailes.values()) {
+                isAllPlayersJoin = isAllPlayersJoin && currPlayerDetails.getStatus() == PlayerStatus.JOINED;
+            }
+        }
+        
+        return isAllPlayersJoin;
     }
 
     
