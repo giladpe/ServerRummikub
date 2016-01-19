@@ -1256,6 +1256,19 @@ public class RummikubWsImplementation {
             throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TILE_POSITION_INDEX + String.valueOf(sequencePosition),
                                                   invalidParameters);
         }
+        
+        //important check
+        if (!this.rummikubLogic.getCurrentPlayer().isFirstMoveDone()) {
+            int legalIndexToPutTiles = this.rummikubLogic.getGameBoard().isEmpty()? 0 : this.rummikubLogic.getGameBoard().boardSize();
+            if (sequenceIndex < legalIndexToPutTiles ) {
+                rummikubFualt.setFaultCode(null);
+                rummikubFualt.setFaultString("canot touch tiles that not belong to the player before finishing the first turn");
+                invalidParameters.setFaultInfo(rummikubFualt);
+                invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_CANT_TUCH_BOARD_IN_FIRST_MOVE);
+                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_CANT_TUCH_BOARD_IN_FIRST_MOVE,
+                                                  invalidParameters);
+            }
+        }
     }
 
     private void onSwapTurnActions() {
