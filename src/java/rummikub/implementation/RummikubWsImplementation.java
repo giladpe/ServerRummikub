@@ -54,7 +54,6 @@ public class RummikubWsImplementation {
     private PlayersMove currentPlayerMove;
     
     //Server related members
-    //private ArrayList<PlayerDetails> playerDetailesList;
     private HashMap<PlayerId,PlayerDetails> playerDetailes;
     private GameStatus gameStatus;
     private boolean isLoadedFromXML;
