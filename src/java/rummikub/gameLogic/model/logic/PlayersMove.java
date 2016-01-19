@@ -244,6 +244,7 @@ public class PlayersMove {
     }
     
     
+    
     private SingleMoveResult implementBoardToHandMove(SingleMove move) {
         boolean isValid;
         SingleMoveResult result = SingleMoveResult.LEGAL_MOVE;

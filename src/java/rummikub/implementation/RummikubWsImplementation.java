@@ -1666,7 +1666,6 @@ public class RummikubWsImplementation {
         boolean isComputerPlayer = !rummikubLogic.getCurrentPlayer().getIsHuman();
 
         if (isComputerPlayer) {
-
             while (isComputerPlayer) {
                 SingleMove singleMove = computerPlayerMakesSingleMove();
                 
