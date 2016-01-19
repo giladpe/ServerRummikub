@@ -348,13 +348,23 @@ public class GameLogic {
     public void shufflePlayersBeforeStartingGame() {
         //Collections.shuffle(this.players);
         //this.indexOfCurrentPlayer = 0;
-        boolean foundHuman = false;
+        this.indexOfCurrentPlayer = this.players.isEmpty()? 0 : ThreadLocalRandom.current().nextInt(0, this.players.size()-1);
+        this.currentPlayer = this.players.get(indexOfCurrentPlayer);
+    }
+    
+    public void shufflePlayersBeforeStartingOnlineGame() {
         
-        while (!foundHuman) {
-            this.indexOfCurrentPlayer = this.players.isEmpty()? 0 : ThreadLocalRandom.current().nextInt(0, this.players.size()-1);
-            this.currentPlayer = this.players.get(indexOfCurrentPlayer);
-            foundHuman = this.currentPlayer.getIsHuman();
-        }
+        this.indexOfCurrentPlayer = this.players.isEmpty()? 0 : ThreadLocalRandom.current().nextInt(0, this.players.size()-1);
+        this.currentPlayer = this.players.get(indexOfCurrentPlayer);
+        
+        //test
+//        boolean foundHuman = false;
+//        
+//        while (!foundHuman) {
+//            this.indexOfCurrentPlayer = this.players.isEmpty()? 0 : ThreadLocalRandom.current().nextInt(0, this.players.size()-1);
+//            this.currentPlayer = this.players.get(indexOfCurrentPlayer);
+//            foundHuman = this.currentPlayer.getIsHuman();
+//        }
     }
     
     public boolean isReachedOneOfEndGameConditions() {

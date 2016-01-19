@@ -222,7 +222,9 @@ public class RummikubWsImplementation {
   
 
         //finish wrtining that method
-        updateGameStatus();
+        Thread thread = new Thread(()->{ updateGameStatus(); });
+        thread.setDaemon(DEAMON_THREAD);
+        thread.start();
         
         return playerId;
     }
@@ -996,7 +998,10 @@ public class RummikubWsImplementation {
 //                playerDetailes.setStatus(PlayerStatus.ACTIVE);
 //            }
 
-            this.rummikubLogic.shufflePlayersBeforeStartingGame();
+            if(!this.isLoadedFromXML) {
+                this.rummikubLogic.shufflePlayersBeforeStartingOnlineGame();
+            }
+             
             initCurrentPlayerMove();
             
             this.eventManager.addGameStartEvent();
