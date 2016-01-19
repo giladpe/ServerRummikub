@@ -1597,9 +1597,9 @@ public class RummikubWsImplementation {
                 isComputerPlayer = !rummikubLogic.getCurrentPlayer().getIsHuman();
             }
         } 
-        else {
-            onSwapTurnActions();
-        }
+        //else {
+        //    onSwapTurnActions();
+        //}
     }
      
     private SingleMove computerPlayerMakesSingleMove() {
