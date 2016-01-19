@@ -120,6 +120,7 @@ public class RummikubWsImplementation {
             JaxBXmlParser.loadSettingsFromXml(xmlData);
 
             checkCaseOfDuplicateGameName(JaxBXmlParser.getGameName());
+            this.isLoadedFromXML = LOADED_FROM_XML;
             this.rummikubLogic = new GameLogic();
             this.rummikubLogic.initGameFromFile(JaxBXmlParser.getPlayerArray(), JaxBXmlParser.getBoard(),
                                            JaxBXmlParser.getCurrPlayer(), JaxBXmlParser.getGameName());
@@ -136,7 +137,6 @@ public class RummikubWsImplementation {
             invalidXML.setMessage(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG);
             throw new InvalidXML_Exception(Utils.Constants.ErrorMessages.FAIL_LOADING_FILE_MSG, invalidXML);
         } 
-        this.isLoadedFromXML = LOADED_FROM_XML;
         return this.rummikubLogic.getGameSettings().getGameName();
     }
     
