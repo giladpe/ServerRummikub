@@ -1139,11 +1139,6 @@ public class RummikubWsImplementation {
     }
 
     private void onGameOverActions() {
-        for (PlayerId id : this.playerDetailes.keySet()) {
-            try{
-                resign(id.getPlayerId());
-            } catch (InvalidParameters_Exception ex) {}
-        }
         this.gameStatus = GameStatus.FINISHED;
         String gameResult = this.rummikubLogic.gameResult();
         this.eventManager.addGameOverEvent();
