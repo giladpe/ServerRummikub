@@ -527,7 +527,6 @@ public class RummikubWsImplementation {
         checkCaseOfIlegalTileListThatRepresentsSeries(tiles);
         cheackCaseTileLocationIndexesAreInvalid(sequenceIndex, sequencePosition);
         cheackCaseTileIncreasingOrder(tile, sequenceIndex, sequencePosition);
-
     }
         
     private void validateParamsAndThrowExceptionInIlegalCase(int playerId, int sourceSequenceIndex, 
@@ -556,6 +555,7 @@ public class RummikubWsImplementation {
     private void checkCaseOfGameDoesNotExists(String gameName) throws GameDoesNotExists_Exception {
 
         checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(gameName); 
+        
         if (isGameNameAlreadyExsists(gameName)) {
             GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
             RummikubFault rummikubFualt = new RummikubFault();
