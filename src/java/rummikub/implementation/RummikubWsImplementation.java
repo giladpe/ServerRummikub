@@ -526,6 +526,8 @@ public class RummikubWsImplementation {
         tiles.add(tile);
         checkCaseOfIlegalTileListThatRepresentsSeries(tiles);
         cheackCaseTileLocationIndexesAreInvalid(sequenceIndex, sequencePosition);
+        cheackCaseTileIncreasingOrder(tile, sequenceIndex, sequencePosition);
+
     }
         
     private void validateParamsAndThrowExceptionInIlegalCase(int playerId, int sourceSequenceIndex, 
@@ -534,6 +536,7 @@ public class RummikubWsImplementation {
         checkCaseOfPlayerNotExsists(playerId);
         cheackCaseTileLocationIndexesAreInvalid(sourceSequenceIndex, sourceSequencePosition);
         cheackCaseTileLocationIndexesAreInvalid(targetSequenceIndex, targetSequencePosition);
+        cheackCaseTileIncreasingOrder(sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
     }
     
     private void checkCaseOfDuplicateGameName(String gameName) throws DuplicateGameName_Exception {
@@ -1099,46 +1102,9 @@ public class RummikubWsImplementation {
         InvalidParameters invalidParameters = new InvalidParameters();
         RummikubFault rummikubFualt = new RummikubFault();
 
-        if (isNegativeNumber(sequenceIndex)) {
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("Negative sequence index:" + String.valueOf(sequenceIndex));
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_SEQUENCE_INDEX + String.valueOf(sequenceIndex));
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_SEQUENCE_INDEX + String.valueOf(sequenceIndex),
-                                                  invalidParameters);
-        }
-        
-        if (isNegativeNumber(sequencePosition)) {
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("Negative position index:" + String.valueOf(sequencePosition));
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_TILE_POSITION_INDEX + String.valueOf(sequencePosition));
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_TILE_POSITION_INDEX + String.valueOf(sequencePosition),
-                                                  invalidParameters);
-        }
-        
-        if (sequenceIndex > this.currentPlayerMove.getBoardAfterMove().boardSize()) {
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("such index of serie not exsists:" + String.valueOf(sequenceIndex));
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_SEQUENCE_INDEX + String.valueOf(sequenceIndex));
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_SEQUENCE_INDEX  + String.valueOf(sequenceIndex),
-                                                  invalidParameters);
-        }
+        checkCaseOfNegativeVals(sequenceIndex,sequencePosition);
+        checkCaseOutOfBoundries(sequenceIndex,sequencePosition);
 
-        if (sequencePosition > this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex).getSizeOfSerie()) {
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("such tile position of tile not exsists:" + String.valueOf(sequencePosition));
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TILE_POSITION_INDEX + String.valueOf(sequencePosition));
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TILE_POSITION_INDEX + String.valueOf(sequencePosition),
-                                                  invalidParameters);
-        }
-        
         //important check
         if (!this.rummikubLogic.getCurrentPlayer().isFirstMoveDone()) {
             int legalIndexToPutTiles = this.rummikubLogic.getGameBoard().isEmpty()? 0 : this.rummikubLogic.getGameBoard().boardSize();
@@ -1369,6 +1335,92 @@ public class RummikubWsImplementation {
             } catch (Exception ex) {
                 currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
             }
+        }
+    }
+
+    private void cheackCaseTileIncreasingOrder(ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
+        Tile logicalTile = convertWsTileToLogicTile(tile);
+        int IndexInHand = this.currentPlayerMove.getHandAfterMove().indexOf(logicalTile);
+        Tile tileToMove = this.currentPlayerMove.getHandAfterMove().get(IndexInHand);
+
+        boolean isValid = this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex).isLegalPlaceOfTile(tileToMove, sequencePosition);
+        
+        if (!isValid) {
+            InvalidParameters invalidParameters = new InvalidParameters();
+            RummikubFault rummikubFualt = new RummikubFault();
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("The tile was placed not in increasing order");
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TILE_INSERTED_NOT_IN_RIGHT_ORDER);
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TILE_INSERTED_NOT_IN_RIGHT_ORDER,
+                                              invalidParameters);
+        }
+    }
+
+    private void cheackCaseTileIncreasingOrder(int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition) throws InvalidParameters_Exception {
+        Tile tileToMove = this.currentPlayerMove.getBoardAfterMove().getSpecificTile(sourceSequenceIndex, sourceSequencePosition);
+        boolean isValid = this.currentPlayerMove.getBoardAfterMove().getSeries(targetSequenceIndex).isLegalPlaceOfTile(tileToMove, targetSequencePosition);
+        
+        if(!isValid) {
+            InvalidParameters invalidParameters = new InvalidParameters();
+            RummikubFault rummikubFualt = new RummikubFault();
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("The tile was placed not in increasing order");
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TILE_INSERTED_NOT_IN_RIGHT_ORDER);
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TILE_INSERTED_NOT_IN_RIGHT_ORDER,
+                                              invalidParameters);
+        }
+    }
+
+    private void checkCaseOfNegativeVals(int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
+        InvalidParameters invalidParameters = new InvalidParameters();
+        RummikubFault rummikubFualt = new RummikubFault();
+        
+        if (isNegativeNumber(sequenceIndex)) {
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("Negative sequence index:" + String.valueOf(sequenceIndex));
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_SEQUENCE_INDEX + String.valueOf(sequenceIndex));
+            
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_SEQUENCE_INDEX + String.valueOf(sequenceIndex),
+                                                  invalidParameters);
+        }
+        
+        if (isNegativeNumber(sequencePosition)) {
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("Negative position index:" + String.valueOf(sequencePosition));
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_TILE_POSITION_INDEX + String.valueOf(sequencePosition));
+            
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_TILE_POSITION_INDEX + String.valueOf(sequencePosition),
+                                                  invalidParameters);
+        }
+        
+    }
+
+    private void checkCaseOutOfBoundries(int sequenceIndex, int sequencePosition) throws InvalidParameters_Exception {
+                InvalidParameters invalidParameters = new InvalidParameters();
+        RummikubFault rummikubFualt = new RummikubFault();
+        
+        if (sequenceIndex > this.currentPlayerMove.getBoardAfterMove().boardSize()) {
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("such index of serie not exsists:" + String.valueOf(sequenceIndex));
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_SEQUENCE_INDEX + String.valueOf(sequenceIndex));
+            
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_SEQUENCE_INDEX  + String.valueOf(sequenceIndex),
+                                                  invalidParameters);
+        }
+
+        if (sequencePosition > this.currentPlayerMove.getBoardAfterMove().getSeries(sequenceIndex).getSizeOfSerie()) {
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("such tile position of tile not exsists:" + String.valueOf(sequencePosition));
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TILE_POSITION_INDEX + String.valueOf(sequencePosition));
+            
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TILE_POSITION_INDEX + String.valueOf(sequencePosition),
+                                                  invalidParameters);
         }
     }
     
