@@ -1140,6 +1140,8 @@ public class RummikubWsImplementation {
 
     private void onGameOverActions() {
         String gameResult = this.rummikubLogic.gameResult();
+        //this.rummikubLogic.getPlayers().clear();
+        //this.rummikubLogic.getGameBoard().clear();
         initGameComponetsToPrepareForNextGame();
         this.gameStatus = GameStatus.FINISHED;
         this.eventManager.addGameOverEvent();
