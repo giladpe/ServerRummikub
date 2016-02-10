@@ -5,6 +5,7 @@
 package rummikub.ws;
 
 import javax.jws.WebService;
+import rummikub.implementation.RummikubSingleGameWsImp;
 import rummikub.implementation.RummikubWsImplementation;
 
 
@@ -12,9 +13,13 @@ import rummikub.implementation.RummikubWsImplementation;
 public class RummikubWS {
 
     private final RummikubWsImplementation serverImplementation = new RummikubWsImplementation();
+    private RummikubSingleGameWsImp currentGame;
+
     
     public java.util.List<ws.rummikub.Event> getEvents(int playerId, int eventId) throws ws.rummikub.InvalidParameters_Exception {
-        return serverImplementation.getEvents(playerId, eventId);
+        currentGame = serverImplementation.getWantedGame(playerId);
+        
+        return currentGame.getEvents(playerId, eventId);
     }
 
     public java.lang.String createGameFromXML(java.lang.String xmlData) throws ws.rummikub.DuplicateGameName_Exception, ws.rummikub.InvalidParameters_Exception, ws.rummikub.InvalidXML_Exception {
@@ -46,26 +51,32 @@ public class RummikubWS {
     }
 
     public void createSequence(int playerId, java.util.List<ws.rummikub.Tile> tiles) throws ws.rummikub.InvalidParameters_Exception {
-        serverImplementation.createSequence(playerId, tiles);
+        currentGame = serverImplementation.getWantedGame(playerId);
+        currentGame.createSequence(playerId, tiles);
     }
 
     public void addTile(int playerId, ws.rummikub.Tile tile, int sequenceIndex, int sequencePosition) throws ws.rummikub.InvalidParameters_Exception {
-        serverImplementation.addTile(playerId, tile, sequenceIndex, sequencePosition);
+        currentGame = serverImplementation.getWantedGame(playerId);
+        currentGame.addTile(playerId, tile, sequenceIndex, sequencePosition);
     }
 
     public void takeBackTile(int playerId, int sequenceIndex, int sequencePosition) throws ws.rummikub.InvalidParameters_Exception {
-        serverImplementation.takeBackTile(playerId, sequenceIndex, sequencePosition);
+        currentGame = serverImplementation.getWantedGame(playerId);
+        currentGame.takeBackTile(playerId, sequenceIndex, sequencePosition);
     }
 
     public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition) throws ws.rummikub.InvalidParameters_Exception {
-        serverImplementation.moveTile(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+        currentGame = serverImplementation.getWantedGame(playerId);
+        currentGame.moveTile(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
     }
 
     public void finishTurn(int playerId) throws ws.rummikub.InvalidParameters_Exception {
-        serverImplementation.finishTurn(playerId);
+        currentGame = serverImplementation.getWantedGame(playerId);
+        currentGame.finishTurn(playerId);
     }
 
     public void resign(int playerId) throws ws.rummikub.InvalidParameters_Exception {
-        serverImplementation.resign(playerId);
+        currentGame = serverImplementation.getWantedGame(playerId);
+        currentGame.resign(playerId);
     }
 }
