@@ -71,6 +71,8 @@ public class RummikubWsImplementation {
             newGame.initGameFromFile(JaxBXmlParser.getPlayerArray(), JaxBXmlParser.getBoard(),
                                            JaxBXmlParser.getCurrPlayer(), JaxBXmlParser.getGameName());
             
+            this.gameListByGameName.put(newGame.getGameName(), newGame);
+            
         } catch (SAXException | IOException ex) {
             InvalidXML invalidXML = new InvalidXML();
             RummikubFault rummikubFualt = new RummikubFault();
