@@ -1214,7 +1214,7 @@ public class RummikubSingleGameWsImp {
 
     private boolean allPlayersJoinedGame() {
         int currGameNumberOfHumanPlayersNeeded = this.rummikubLogic.getGameOriginalInputedSettings().getNumOfHumanPlayers();
-        boolean isAllPlayersJoin = this.rummikubLogic.getNumberOfJoinedHumanPlayers() == currGameNumberOfHumanPlayersNeeded;
+        boolean isAllPlayersJoin = getNumberOfJoinedHumanPlayers() == currGameNumberOfHumanPlayersNeeded;
 
         if (isAllPlayersJoin) {
             for (PlayerDetails currPlayerDetails : this.playerDetailes.values()) {
@@ -1460,7 +1460,19 @@ public class RummikubSingleGameWsImp {
     }
 
     public int getNumberOfJoinedHumanPlayers() {
-        return this.rummikubLogic.getNumberOfJoinedHumanPlayers();
+        int numberOfJoinedHumanPlayers = 0;
+        if (this.isLoadedFromXML) {
+            for (PlayerDetails playerDetails : this.playerDetailes.values()) {
+                if (playerDetails.getStatus() == PlayerStatus.JOINED && playerDetails.getType() == PlayerType.HUMAN) {
+                    numberOfJoinedHumanPlayers++;
+                }
+            }
+        }
+        else {
+            numberOfJoinedHumanPlayers = this.rummikubLogic.getNumberOfJoinedHumanPlayers();
+        }
+        
+        return numberOfJoinedHumanPlayers;
     }
 
     public boolean isLoadedFromXml() {
