@@ -1429,7 +1429,8 @@ public class RummikubSingleGameWsImp {
 
             //walk throw details list and set status to active????
             this.playerDetailes.values().stream().forEach((currPlayerDetailes) -> { 
-                currPlayerDetailes.setStatus(PlayerStatus.ACTIVE); });
+                currPlayerDetailes.setStatus(PlayerStatus.ACTIVE); 
+            });
 
             if(!this.isLoadedFromXML) {
                 this.rummikubLogic.shufflePlayersBeforeStartingOnlineGame();
