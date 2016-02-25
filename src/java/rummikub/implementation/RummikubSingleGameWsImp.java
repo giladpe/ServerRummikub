@@ -36,7 +36,7 @@ public class RummikubSingleGameWsImp {
     private static final boolean DEAMON_THREAD = true;
     private static int INDEX_NORMALIZATION = 1;
     private static final int START_OF_THE_SERIES = 0;
-    private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(2);
+    private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(20);
     private static final long DELAY_FOR_COMPUTER_MOVE = 1500;
     private static final int NOT_RELATED_TO_ANY_PLAYER = -1;
     private static final String CREATED_BY_FILE = "";
