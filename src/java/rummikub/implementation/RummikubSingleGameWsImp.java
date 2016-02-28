@@ -4,7 +4,6 @@
 
 package rummikub.implementation;
 import java.awt.Point;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-import org.xml.sax.SAXException;
 import rummikub.gameLogic.controller.rummikub.SingleMove;
 import rummikub.gameLogic.model.gameobjects.Board;
 import rummikub.gameLogic.model.gameobjects.Serie;
@@ -34,6 +32,7 @@ public class RummikubSingleGameWsImp {
     private static final boolean WITH_TILE_LIST = true;
     private static final boolean LOADED_FROM_XML = true;
     private static final boolean DEAMON_THREAD = true;
+    private static final boolean ADD_EVENT = true;
     private static int INDEX_NORMALIZATION = 1;
     private static final int START_OF_THE_SERIES = 0;
     private static final long TIMER_DELAY = TimeUnit.MINUTES.toMillis(20);
@@ -271,7 +270,7 @@ public class RummikubSingleGameWsImp {
                 int numOfIterations = serie.getSizeOfSerie() - sequencePosition;
 
                 for (int i = targetSequencePosition; i <= numOfIterations; i++) {
-                    moveTileFromBoardToBoard(playerId, sequenceIndex, sequencePosition, indexLastSerie, i);
+                    moveTileFromBoardToBoard(playerId, sequenceIndex, sequencePosition, indexLastSerie, i, ADD_EVENT);
                 }
             } catch (Exception ex){
                 revertTheTurn(playerId);
@@ -350,7 +349,8 @@ public class RummikubSingleGameWsImp {
         setTimerForPlayerResponse(playerId);
         Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(targetSequenceIndex);
         final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
-        moveTileFromBoardToBoard(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+        moveTileFromBoardToBoard(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex,
+                                 targetSequencePosition, ADD_EVENT);
 
         if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
             try {
@@ -364,14 +364,15 @@ public class RummikubSingleGameWsImp {
                         0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
 
                 int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
-
+                
                 for (int i = 0 ; i < numOfIterations; i++) {
                     if (!isAlreadyAdded) {
                         this.eventManager.addCreateSequenceEvent(playerId, tileList);
                         isAlreadyAdded = true;
                     }
-                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i);
+                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
                 }
+
             } catch (Exception ex) {
                 revertTheTurn(playerId);
             }
@@ -1240,13 +1241,20 @@ public class RummikubSingleGameWsImp {
         return sequencePosition == START_OF_THE_SERIES || sequencePosition == END_OF_THE_SERIES;
     }
 
-    private void moveTileFromBoardToBoard(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, int targetSequencePosition) throws InvalidParameters_Exception {
+    private void moveTileFromBoardToBoard(int playerId, int sourceSequenceIndex, int sourceSequencePosition,
+                                          int targetSequenceIndex, int targetSequencePosition, 
+                                          boolean needToAddEvent) throws InvalidParameters_Exception {
+        
         Point source = new Point(sourceSequenceIndex, sourceSequencePosition);
         Point target = new Point(targetSequenceIndex, targetSequencePosition);
 
         SingleMove singleMove = new SingleMove(target, source, SingleMove.MoveType.BOARD_TO_BOARD);
         dealWithSingleMoveResualt(singleMove);
-        this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+        
+        if (needToAddEvent) {
+            this.eventManager.addMoveTileEvent(playerId, sourceSequenceIndex, sourceSequencePosition,
+                                               targetSequenceIndex, targetSequencePosition);
+        }
     }
 
     private boolean allPlayersJoinedGame() {
