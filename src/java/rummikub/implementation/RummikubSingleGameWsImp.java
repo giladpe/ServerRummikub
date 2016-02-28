@@ -110,7 +110,8 @@ public class RummikubSingleGameWsImp {
   
         return newEventsListForCurrPlayer;
     }
-
+    
+    // <editor-fold defaultstate="collapsed" desc="MOVED TO: RummikubWsImplementation">
 //    public String createGameFromXML(String xmlData) throws DuplicateGameName_Exception, InvalidParameters_Exception, 
 //                                                           InvalidXML_Exception {
 //        try {
@@ -226,6 +227,7 @@ public class RummikubSingleGameWsImp {
 //
 //        return findPlayerDetails(playerId);
 //    }
+    // </editor-fold>
 
     public void createSequence(int playerId, List<ws.rummikub.Tile> tiles) throws InvalidParameters_Exception {
 
@@ -339,18 +341,15 @@ public class RummikubSingleGameWsImp {
         }
     }
 
-    public void moveTile(int playerId, int sourceSequenceIndex, 
-                         int sourceSequencePosition, int targetSequenceIndex, 
+    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
                          int targetSequencePosition) throws InvalidParameters_Exception {
 
         validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
         
         setTimerForPlayerResponse(playerId);
-    
-        moveTileFromBoardToBoard(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
-
         Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(targetSequenceIndex);
         final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
+        moveTileFromBoardToBoard(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
 
         if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
             try {
@@ -359,13 +358,13 @@ public class RummikubSingleGameWsImp {
                 Tile logicTile = serie.getSpecificTile(targetSequencePosition);
                 tileList.add(convertLogicTileToWsTile(logicTile));
                 boolean isAlreadyAdded = false;
-                int targetSequencePositionInNewSeries = 1;
+                //int targetSequencePositionInNewSeries = 1;
                 int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
                         0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
 
                 int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
 
-                for (int i = targetSequencePositionInNewSeries ; i < numOfIterations; i++) {
+                for (int i = 0 ; i < numOfIterations; i++) {
                     if (!isAlreadyAdded) {
                         this.eventManager.addCreateSequenceEvent(playerId, tileList);
                         isAlreadyAdded = true;
@@ -378,7 +377,45 @@ public class RummikubSingleGameWsImp {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method">
+    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method 2">
+//    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
+//                         int targetSequencePosition) throws InvalidParameters_Exception {
+//
+//        validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+//        
+//        setTimerForPlayerResponse(playerId);
+//        moveTileFromBoardToBoard(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+//        Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(targetSequenceIndex);
+//        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
+//
+//        if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
+//            try {
+//                //split case
+//                ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
+//                Tile logicTile = serie.getSpecificTile(targetSequencePosition);
+//                tileList.add(convertLogicTileToWsTile(logicTile));
+//                boolean isAlreadyAdded = false;
+//                int targetSequencePositionInNewSeries = 1;
+//                int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
+//                        0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
+//
+//                int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
+//
+//                for (int i = targetSequencePositionInNewSeries ; i < numOfIterations; i++) {
+//                    if (!isAlreadyAdded) {
+//                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
+//                        isAlreadyAdded = true;
+//                    }
+//                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i);
+//                }
+//            } catch (Exception ex) {
+//                revertTheTurn(playerId);
+//            }
+//        }
+//    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method 1">
     //    public void moveTile(int playerId, int sourceSequenceIndex, 
 //                         int sourceSequencePosition, int targetSequenceIndex, 
 //                         int targetSequencePosition) throws InvalidParameters_Exception {
@@ -416,7 +453,6 @@ public class RummikubSingleGameWsImp {
 //    }
     // </editor-fold>
     
-
     public void finishTurn(int playerId) throws InvalidParameters_Exception {
 
         validateParamsAndThrowExceptionInIlegalCase(playerId);
@@ -1199,7 +1235,7 @@ public class RummikubSingleGameWsImp {
         this.eventManager.clearAllEvents();
     }
 
-    private boolean isPositionAtStartOrEndOfSeries(int sequencePosition, final int START_OF_THE_SERIES,final int END_OF_THE_SERIES) {
+    private boolean isPositionAtStartOrEndOfSeries(int sequencePosition, final int START_OF_THE_SERIES, final int END_OF_THE_SERIES) {
         return sequencePosition == START_OF_THE_SERIES || sequencePosition == END_OF_THE_SERIES;
     }
 
