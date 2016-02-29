@@ -9,10 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.xml.sax.SAXException;
-import rummikub.gameLogic.model.logic.GameLogic;
 import rummikub.gameLogic.model.logic.Settings;
-import rummikub.gameLogic.model.player.HumanPlayer;
-import rummikub.gameLogic.model.player.Player;
 import rummikub.gameLogic.view.ioui.JaxBXmlParser;
 import rummikub.gameLogic.view.ioui.Utils;
 import ws.rummikub.*;
@@ -183,6 +180,7 @@ public class RummikubWsImplementation {
     
     private void validateParamsAndThrowExceptionInIlegalCase(String gameName, int humanPlayers, int computerizedPlayers) throws DuplicateGameName_Exception,
                                                                                                InvalidParameters_Exception {
+        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters_Exception(gameName); 
         checkCaseOfDuplicateGameName(gameName);
         validateNumberOfHumanAndComputerPlayers(humanPlayers, computerizedPlayers);
     }
@@ -274,7 +272,7 @@ public class RummikubWsImplementation {
 
     private void checkCaseOfGameDoesNotExists(String gameName) throws GameDoesNotExists_Exception {
 
-        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(gameName); 
+        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists_Exception(gameName); 
         
         if (!isGameNameAlreadyExsists(gameName)) {
             GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
@@ -288,7 +286,7 @@ public class RummikubWsImplementation {
         }
     }
     
-    private void checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(String gameName) throws GameDoesNotExists_Exception {
+    private void checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists_Exception(String gameName) throws GameDoesNotExists_Exception {
         
         if(isEmptyStringOrNullOrContainsStartingWhiteSpaces(gameName)) {
             GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
@@ -300,6 +298,21 @@ public class RummikubWsImplementation {
             gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES);
             throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES,
                                                   gameDoesNotExsists);
+        }
+    }
+    
+    private void checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters_Exception(String gameName) throws InvalidParameters_Exception {
+        
+        if(isEmptyStringOrNullOrContainsStartingWhiteSpaces(gameName)) {
+            InvalidParameters invalidParameters = new InvalidParameters();
+            RummikubFault rummikubFualt = new RummikubFault();
+
+            rummikubFualt.setFaultCode(null);
+            rummikubFualt.setFaultString("game name is empty or null or contains starting white spaces");
+            invalidParameters.setFaultInfo(rummikubFualt);
+            invalidParameters.setMessage(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES);
+            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES,
+                                                  invalidParameters);
         }
     }
     
