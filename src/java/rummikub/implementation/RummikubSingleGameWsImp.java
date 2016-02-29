@@ -365,13 +365,23 @@ public class RummikubSingleGameWsImp {
 
                 int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
                 
+                this.eventManager.addCreateSequenceEvent(playerId, tileList);
+                
                 for (int i = 0 ; i < numOfIterations; i++) {
+                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition,
+                                             indexLastSerie, i, isAlreadyAdded);
                     if (!isAlreadyAdded) {
-                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
                         isAlreadyAdded = true;
                     }
-                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
                 }
+                
+//                for (int i = 0 ; i < numOfIterations; i++) {
+//                    if (!isAlreadyAdded) {
+//                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
+//                        isAlreadyAdded = true;
+//                    }
+//                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
+//                }
 
             } catch (Exception ex) {
                 revertTheTurn(playerId);
