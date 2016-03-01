@@ -341,7 +341,7 @@ public class RummikubSingleGameWsImp {
         }
     }
     
-    // <editor-fold defaultstate="collapsed" desc="CURRENT version of moveTile method - version with ONE tile in list of sequence created event">
+    // <editor-fold defaultstate="collapsed" desc="CURRENT version of moveTile method - version with empty list of sequence created event">
     public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
                          int targetSequencePosition) throws InvalidParameters_Exception {
 
@@ -354,35 +354,18 @@ public class RummikubSingleGameWsImp {
                                  targetSequencePosition, ADD_EVENT);
 
         if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
+            //split case
             try {
-                //split case
-                ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
-                Tile logicTile = serie.getSpecificTile(targetSequencePosition);
-                tileList.add(convertLogicTileToWsTile(logicTile));
-                boolean isAlreadyAdded = false;
-                //int targetSequencePositionInNewSeries = 1;
-                int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
+                final int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
+                final int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
                         0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
-
-                int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
                 
-                this.eventManager.addCreateSequenceEvent(playerId, tileList);
+                this.eventManager.addCreateSequenceEvent(playerId, new ArrayList<>());
                 
                 for (int i = 0 ; i < numOfIterations; i++) {
                     moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition,
-                                             indexLastSerie, i, isAlreadyAdded);
-                    if (!isAlreadyAdded) {
-                        isAlreadyAdded = true;
-                    }
+                                             indexLastSerie, i, ADD_EVENT);
                 }
-                
-//                for (int i = 0 ; i < numOfIterations; i++) {
-//                    if (!isAlreadyAdded) {
-//                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
-//                        isAlreadyAdded = true;
-//                    }
-//                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
-//                }
 
             } catch (Exception ex) {
                 revertTheTurn(playerId);
@@ -390,8 +373,17 @@ public class RummikubSingleGameWsImp {
         }
     }
     // </editor-fold>
+
+//test of loop    
+//                for (int i = 0 ; i < numOfIterations; i++) {
+//                    if (!isAlreadyAdded) {
+//                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
+//                        isAlreadyAdded = true;
+//                    }
+//                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
+//                }
     
-    // <editor-fold defaultstate="collapsed" desc="TEST version of moveTile method - version with empty list of sequence created event">
+    // <editor-fold defaultstate="collapsed" desc="old version of moveTile method (before Liron's answer) - version with ONE tile in list of sequence created event">
 //    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
 //                         int targetSequencePosition) throws InvalidParameters_Exception {
 //
@@ -404,33 +396,27 @@ public class RummikubSingleGameWsImp {
 //                                 targetSequencePosition, ADD_EVENT);
 //
 //        if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
+//            //split case
 //            try {
-//                //split case
 //                ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
-////                Tile logicTile = serie.getSpecificTile(targetSequencePosition);
-////                tileList.add(convertLogicTileToWsTile(logicTile));
-////                boolean isAlreadyAdded = false;
-//                //int targetSequencePositionInNewSeries = 1;
-//                int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
+//                Tile logicTile = serie.getSpecificTile(targetSequencePosition);
+//                tileList.add(convertLogicTileToWsTile(logicTile));
+//                boolean isAlreadyAdded = false;
+//                final int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
 //                        0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
 //
-//                int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
+//                final int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
 //                
 //                this.eventManager.addCreateSequenceEvent(playerId, tileList);
 //                
 //                for (int i = 0 ; i < numOfIterations; i++) {
 //                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition,
-//                                             indexLastSerie, i, ADD_EVENT);
+//                                             indexLastSerie, i, isAlreadyAdded);
+//                    if (!isAlreadyAdded) {
+//                        isAlreadyAdded = true;
+//                    }
 //                }
 //                
-////                for (int i = 0 ; i < numOfIterations; i++) {
-////                    if (!isAlreadyAdded) {
-////                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
-////                        isAlreadyAdded = true;
-////                    }
-////                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
-////                }
-//
 //            } catch (Exception ex) {
 //                revertTheTurn(playerId);
 //            }
@@ -438,7 +424,7 @@ public class RummikubSingleGameWsImp {
 //    }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method - bugged version used in Ex3">
+    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method - bugged version used in Ex3 - DO NOT USE">
 //    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
 //                         int targetSequencePosition) throws InvalidParameters_Exception {
 //
