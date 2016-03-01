@@ -233,4 +233,8 @@ public class Board {
     public void clear() {
         this.listOfSerie.clear();
     }
+
+    public int indexOf(Serie serie) {
+       return this.listOfSerie.indexOf(serie);
+    }
 }

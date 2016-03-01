@@ -356,11 +356,12 @@ public class RummikubSingleGameWsImp {
                 final int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
                 final int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
                         0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
-                
+                final int serieIndex = this.currentPlayerMove.getBoardAfterMove().indexOf(serie);
                 this.eventManager.addCreateSequenceEvent(playerId, new ArrayList<>());
                 
                 for (int i = 0 ; i < numOfIterations; i++) {
-                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition,
+
+                    moveTileFromBoardToBoard(playerId, serieIndex, targetSequencePosition,
                                              indexLastSerie, i, ADD_EVENT);
                 }
 
