@@ -40,12 +40,9 @@ public class RummikubSingleGameWsImp {
     private static final int NOT_RELATED_TO_ANY_PLAYER = -1;
     private static final String CREATED_BY_FILE = "";
     private static final SingleMove IS_FINISHED_TURN = null;
-
     private static final int DISABLED_TIMER = 0;
 
-
-    
-    //private members:
+    //Private Members:
     
     //Game logic members
     private GameLogic rummikubLogic;
@@ -373,15 +370,6 @@ public class RummikubSingleGameWsImp {
         }
     }
     // </editor-fold>
-
-//test of loop    
-//                for (int i = 0 ; i < numOfIterations; i++) {
-//                    if (!isAlreadyAdded) {
-//                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
-//                        isAlreadyAdded = true;
-//                    }
-//                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
-//                }
     
     // <editor-fold defaultstate="collapsed" desc="old version of moveTile method (before Liron's answer) - version with ONE tile in list of sequence created event">
 //    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
@@ -508,29 +496,6 @@ public class RummikubSingleGameWsImp {
         Player printablePlayer = rummikubLogic.getCurrentPlayer().clonePlayer();
         this.currentPlayerMove = new PlayersMove(printablePlayer.getListPlayerTiles(), printableBoard, isFirstMoveDone);
     }
-    
-    private void validateParamsAndThrowExceptionInIlegalCase(String gameName, int humanPlayers, int computerizedPlayers) throws DuplicateGameName_Exception,
-                                                                                               InvalidParameters_Exception {
-        checkCaseOfDuplicateGameName(gameName);
-        validateNumberOfHumanAndComputerPlayers(humanPlayers, computerizedPlayers);
-    }
-    
-    private void validateParamsAndThrowExceptionInIlegalCase(String gameName) throws GameDoesNotExists_Exception {
-        checkCaseOfGameDoesNotExists(gameName);
-    }
-    
-    private void validateParamsAndThrowExceptionInIlegalCase(String gameName, String playerName) throws GameDoesNotExists_Exception, 
-                                                                                                        InvalidParameters_Exception {
-        checkCaseOfGameDoesNotExists(gameName);
-        checkCaseOfPlayerAlreadyExsists(gameName, playerName);
-        checkCaseOfGameStatusIsNotWaiting(gameName);
-    }
-
-    private void validateParamsAndThrowExceptionGameNotExsistsOrInvalidParams(int playerId) throws GameDoesNotExists_Exception, 
-                                                                                  InvalidParameters_Exception {
-        checkCaseOfPlayerNotExsists(playerId);
-        checkCaseOfGameDoesNotExists(playerId);
-    }
 
     private void validateParamsAndThrowExceptionInIlegalCase(int playerId) throws InvalidParameters_Exception {
         checkCaseOfPlayerNotExsists(playerId);
@@ -568,88 +533,7 @@ public class RummikubSingleGameWsImp {
         cheackCaseTileLocationIndexesAreInvalid(targetSequenceIndex, targetSequencePosition);
         cheackCaseTileIncreasingOrder(sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
     }
-    
-    private void checkCaseOfDuplicateGameName(String gameName) throws DuplicateGameName_Exception {
-        
-        if (isGameNameAlreadyExsists(gameName)) {
-            DuplicateGameName duplicateGameName  = new DuplicateGameName();
-            RummikubFault rummikubFualt = new RummikubFault();
-
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("name already exsists");
-            duplicateGameName.setFaultInfo(rummikubFualt);
-            duplicateGameName.setMessage(Utils.Constants.ErrorMessages.GAME_NAME_ALREADY_EXSIST);
-            throw new DuplicateGameName_Exception(Utils.Constants.ErrorMessages.GAME_NAME_ALREADY_EXSIST, duplicateGameName);
-        }
-    }
-    
-    private void checkCaseOfGameDoesNotExists(String gameName) throws GameDoesNotExists_Exception {
-
-        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(gameName); 
-        
-        if (isGameNameAlreadyExsists(gameName)) {
-            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
-            RummikubFault rummikubFualt = new RummikubFault();
-
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("name not exsists");
-            gameDoesNotExsists.setFaultInfo(rummikubFualt);
-            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.GAME_NAME_NOT_EXSIST);
-            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.GAME_NAME_NOT_EXSIST, gameDoesNotExsists);
-        }
-    }
-    
-    private void checkCaseOfGameDoesNotExists(int playerId) throws GameDoesNotExists_Exception {
-
-        PlayerDetails playerDetails = findPlayerDetails(playerId);
-        
-        if (playerDetails == null) {
-            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
-            RummikubFault rummikubFualt = new RummikubFault();
-
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("player id not exsists");
-            gameDoesNotExsists.setFaultInfo(rummikubFualt);
-            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS);
-            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS, gameDoesNotExsists);
-        }
-    }
-    
-    private void checkCaseOfPlayerAlreadyExsists(String gameName, String playerName) throws InvalidParameters_Exception {
-        
-        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters(playerName);
-        
-        if (this.isLoadedFromXML) {
-            PlayerDetails playerDetails = this.playerDetailes.get(findPlayerId(playerName));
-            
-            if (!this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName) || playerDetails.getStatus() == PlayerStatus.JOINED) {
-                InvalidParameters invalidParameters = new InvalidParameters();
-                RummikubFault rummikubFualt = new RummikubFault();
-
-                rummikubFualt.setFaultCode(null);
-                rummikubFualt.setFaultString("For a loaded game such player not exsists");
-                invalidParameters.setFaultInfo(rummikubFualt);
-                invalidParameters.setMessage(Utils.Constants.ErrorMessages.PLAYER_NAME_NOT_EXSISTS_IN_XML_LOADED_GAME);
-
-                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.PLAYER_NAME_NOT_EXSISTS_IN_XML_LOADED_GAME,
-                        invalidParameters);
-            }
-        }
-        else {
-            if (this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName)) {
-                InvalidParameters invalidParameters = new InvalidParameters();
-                RummikubFault rummikubFualt = new RummikubFault();
-
-                rummikubFualt.setFaultCode(null);
-                rummikubFualt.setFaultString("There is already a player with same name");
-                invalidParameters.setFaultInfo(rummikubFualt);
-                invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_PLAYER_NAME);
-
-                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_PLAYER_NAME, invalidParameters);
-            }    
-        }
-    }
-     
+      
     private void checkCaseOfPlayerNotExsists(int playerId) throws InvalidParameters_Exception {
         
         PlayerDetails playerDetails = findPlayerDetails(playerId);
@@ -666,22 +550,6 @@ public class RummikubSingleGameWsImp {
             throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS,
                     invalidParameters);
 
-        }
-    }
-    
-    private void checkCaseOfGameStatusIsNotWaiting(String gameName) throws InvalidParameters_Exception {
-        
-        if (this.gameStatus != GameStatus.WAITING) {
-            InvalidParameters invalidParameters = new InvalidParameters();
-            RummikubFault rummikubFualt = new RummikubFault();
-            
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("There game already stared");
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.GAME_NOT_IN_WAITING_STATUS);
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.GAME_NOT_IN_WAITING_STATUS,
-                                                  invalidParameters);
         }
     }
     
@@ -709,95 +577,239 @@ public class RummikubSingleGameWsImp {
         }
     }
     
-    
-    // <editor-fold defaultstate="collapsed" desc="TODO - WHEN WE SUPPORT MULTIPLE GAMES - NOW RETURNS ALWYAS FASLE">
-    //TODO:
-    //when we will support multiple game we have to check if the game's name already exsists - now returns always false
+    // <editor-fold defaultstate="collapsed" desc="old functions that moved to RummikubWsImplementation">
+//    
+//    private void validateParamsAndThrowExceptionInIlegalCase(String gameName, int humanPlayers, int computerizedPlayers) throws DuplicateGameName_Exception,
+//                                                                                               InvalidParameters_Exception {
+//        checkCaseOfDuplicateGameName(gameName);
+//        validateNumberOfHumanAndComputerPlayers(humanPlayers, computerizedPlayers);
+//    }
+//    
+//    private void validateParamsAndThrowExceptionInIlegalCase(String gameName) throws GameDoesNotExists_Exception {
+//        checkCaseOfGameDoesNotExists(gameName);
+//    }
+//    
+//    private void validateParamsAndThrowExceptionInIlegalCase(String gameName, String playerName) throws GameDoesNotExists_Exception, 
+//                                                                                                        InvalidParameters_Exception {
+//        checkCaseOfGameDoesNotExists(gameName);
+//        checkCaseOfPlayerAlreadyExsists(gameName, playerName);
+//        checkCaseOfGameStatusIsNotWaiting(gameName);
+//    }
+//
+//    private void validateParamsAndThrowExceptionGameNotExsistsOrInvalidParams(int playerId) throws GameDoesNotExists_Exception, 
+//                                                                                  InvalidParameters_Exception {
+//        checkCaseOfPlayerNotExsists(playerId);
+//        checkCaseOfGameDoesNotExists(playerId);
+//    }
+//    
+//    private void checkCaseOfDuplicateGameName(String gameName) throws DuplicateGameName_Exception {
+//        
+//        if (isGameNameAlreadyExsists(gameName)) {
+//            DuplicateGameName duplicateGameName  = new DuplicateGameName();
+//            RummikubFault rummikubFualt = new RummikubFault();
+//
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("name already exsists");
+//            duplicateGameName.setFaultInfo(rummikubFualt);
+//            duplicateGameName.setMessage(Utils.Constants.ErrorMessages.GAME_NAME_ALREADY_EXSIST);
+//            throw new DuplicateGameName_Exception(Utils.Constants.ErrorMessages.GAME_NAME_ALREADY_EXSIST, duplicateGameName);
+//        }
+//    }
+//    
+//    private void checkCaseOfGameDoesNotExists(String gameName) throws GameDoesNotExists_Exception {
+//
+//        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(gameName); 
+//        
+//        if (isGameNameAlreadyExsists(gameName)) {
+//            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
+//            RummikubFault rummikubFualt = new RummikubFault();
+//
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("name not exsists");
+//            gameDoesNotExsists.setFaultInfo(rummikubFualt);
+//            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.GAME_NAME_NOT_EXSIST);
+//            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.GAME_NAME_NOT_EXSIST, gameDoesNotExsists);
+//        }
+//    }
+//    
+//    private void checkCaseOfGameDoesNotExists(int playerId) throws GameDoesNotExists_Exception {
+//
+//        PlayerDetails playerDetails = findPlayerDetails(playerId);
+//        
+//        if (playerDetails == null) {
+//            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
+//            RummikubFault rummikubFualt = new RummikubFault();
+//
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("player id not exsists");
+//            gameDoesNotExsists.setFaultInfo(rummikubFualt);
+//            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS);
+//            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.PLAYER_ID_NOT_EXSISTS, gameDoesNotExsists);
+//        }
+//    }
+//    
+//    private void checkCaseOfPlayerAlreadyExsists(String gameName, String playerName) throws InvalidParameters_Exception {
+//        
+//        checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters(playerName);
+//        
+//        if (this.isLoadedFromXML) {
+//            PlayerDetails playerDetails = this.playerDetailes.get(findPlayerId(playerName));
+//            
+//            if (!this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName) || playerDetails.getStatus() == PlayerStatus.JOINED) {
+//                InvalidParameters invalidParameters = new InvalidParameters();
+//                RummikubFault rummikubFualt = new RummikubFault();
+//
+//                rummikubFualt.setFaultCode(null);
+//                rummikubFualt.setFaultString("For a loaded game such player not exsists");
+//                invalidParameters.setFaultInfo(rummikubFualt);
+//                invalidParameters.setMessage(Utils.Constants.ErrorMessages.PLAYER_NAME_NOT_EXSISTS_IN_XML_LOADED_GAME);
+//
+//                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.PLAYER_NAME_NOT_EXSISTS_IN_XML_LOADED_GAME,
+//                        invalidParameters);
+//            }
+//        }
+//        else {
+//            if (this.rummikubLogic.getGameSettings().isPlayerNameExists(playerName)) {
+//                InvalidParameters invalidParameters = new InvalidParameters();
+//                RummikubFault rummikubFualt = new RummikubFault();
+//
+//                rummikubFualt.setFaultCode(null);
+//                rummikubFualt.setFaultString("There is already a player with same name");
+//                invalidParameters.setFaultInfo(rummikubFualt);
+//                invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_PLAYER_NAME);
+//
+//                throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_PLAYER_NAME, invalidParameters);
+//            }    
+//        }
+//    }
+//
+//    private void checkCaseOfGameStatusIsNotWaiting(String gameName) throws InvalidParameters_Exception {
+//        
+//        if (this.gameStatus != GameStatus.WAITING) {
+//            InvalidParameters invalidParameters = new InvalidParameters();
+//            RummikubFault rummikubFualt = new RummikubFault();
+//            
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("There game already stared");
+//            invalidParameters.setFaultInfo(rummikubFualt);
+//            invalidParameters.setMessage(Utils.Constants.ErrorMessages.GAME_NOT_IN_WAITING_STATUS);
+//            
+//            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.GAME_NOT_IN_WAITING_STATUS,
+//                                                  invalidParameters);
+//        }
+//    }    
+//    
+//    // <editor-fold defaultstate="collapsed" desc="DONE IN RummikubWsImplementation  - WHEN WE SUPPORT MULTIPLE GAMES - NOW RETURNS ALWYAS FASLE">
+//    //TODO:
+//    //when we will support multiple game we have to check if the game's name already exsists - now returns always false
+//    // </editor-fold>
+//    private boolean isGameNameAlreadyExsists(String gameName) {
+//        boolean isGameAlreadyExsists = false;
+//
+//        return isGameAlreadyExsists;
+//    }
+//
+//    private void validateNumberOfHumanAndComputerPlayers(int humanPlayers, int computerizedPlayers) throws InvalidParameters_Exception {
+//        InvalidParameters invalidParameters = new InvalidParameters();
+//        RummikubFault rummikubFualt = new RummikubFault();
+//
+//        if (isNegativeNumber(humanPlayers)) {
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("amout of human players is negative number");
+//            invalidParameters.setFaultInfo(rummikubFualt);
+//            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_HUMAN_PLAYERS);
+//            
+//            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_HUMAN_PLAYERS,
+//                                                  invalidParameters);
+//        }
+//        
+//        if (isNegativeNumber(computerizedPlayers)) {
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("amout of computer players is negative number");
+//            invalidParameters.setFaultInfo(rummikubFualt);
+//            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_COMPUTER_PLAYERS);
+//            
+//            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_COMPUTER_PLAYERS,
+//                                                  invalidParameters);
+//        }
+//        
+//        if (isOutOfBounderiesOfTheGamePlayerNumber(humanPlayers, computerizedPlayers)) {
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("amout of players is bigger then "+ Settings.MAX_NUMBER_OF_PLAYERS + "or smaller then" + Settings.MIN_NUMBER_OF_PLAYERS);
+//            invalidParameters.setFaultInfo(rummikubFualt);
+//            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TOTAL_PLAYER_NUMBER);
+//            
+//            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TOTAL_PLAYER_NUMBER,
+//                                                  invalidParameters);
+//        }
+//    }
+//
+//    private void checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(String gameName) throws GameDoesNotExists_Exception {
+//        
+//        if(isEmptyStringOrNullOrContainsStartingWhiteSpaces(gameName)) {
+//            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
+//            RummikubFault rummikubFualt = new RummikubFault();
+//
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("game name is empty or null or contains starting white spaces");
+//            gameDoesNotExsists.setFaultInfo(rummikubFualt);
+//            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES);
+//            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES,
+//                                                  gameDoesNotExsists);
+//        }
+//    }
+//
+//    private void checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters(String gameName) throws InvalidParameters_Exception {
+//        
+//        if(isEmptyStringOrNullOrContainsStartingWhiteSpaces(gameName)) {
+//            InvalidParameters invalidParameters = new InvalidParameters();
+//            RummikubFault rummikubFualt = new RummikubFault();
+//
+//            rummikubFualt.setFaultCode(null);
+//            rummikubFualt.setFaultString("player name is empty or null or contains starting white spaces");
+//            invalidParameters.setFaultInfo(rummikubFualt);
+//            invalidParameters.setMessage(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES);
+//            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES,
+//                                                  invalidParameters);
+//        }
+//    }
+//    
+//    private boolean isOutOfBounderiesOfTheGamePlayerNumber(int humanPlayers, int computerizedPlayers) {
+//        int totalNumberOfPlayers = humanPlayers + computerizedPlayers;
+//        
+//        return totalNumberOfPlayers > Settings.MAX_NUMBER_OF_PLAYERS || totalNumberOfPlayers < Settings.MIN_NUMBER_OF_PLAYERS;
+//    }
+//
+//    private boolean isEmptyStringOrNullOrContainsStartingWhiteSpaces(String stringToCheck) {
+//       return !(stringToCheck != null && !stringToCheck.isEmpty() && !Character.isWhitespace(stringToCheck.charAt(0)));
+//    }
+//    
+//    private void initGameComponetsToPrepareForNextGame() {
+//
+//        this.rummikubLogic = null;
+//        this.serieGenerator = new SeriesGenerator();
+//        this.newMoveGenerator = new ComputerSingleMoveGenerator();
+//
+//        this.playerDetailes.clear();
+//        this.gameStatus = GameStatus.WAITING;
+//        this.isLoadedFromXML = !LOADED_FROM_XML;
+//        this.timer = new Timer(DEAMON_THREAD);
+//        this.eventManager.clearAllEvents();
+//    }
+//    
+//    private void ImplementCompuerPlayerTurn(SingleMove singleMove) {
+//        if (singleMove != null) {
+//            try {
+//                dealWithSingleMoveResualt(singleMove);
+//            } catch (Exception ex) {
+//                currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
+//            }
+//        }
+//    }
     // </editor-fold>
-    private boolean isGameNameAlreadyExsists(String gameName) {
-        boolean isGameAlreadyExsists = false;
-
-        return isGameAlreadyExsists;
-    }
-
-    private void validateNumberOfHumanAndComputerPlayers(int humanPlayers, int computerizedPlayers) throws InvalidParameters_Exception {
-        InvalidParameters invalidParameters = new InvalidParameters();
-        RummikubFault rummikubFualt = new RummikubFault();
-
-        if (isNegativeNumber(humanPlayers)) {
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("amout of human players is negative number");
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_HUMAN_PLAYERS);
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_HUMAN_PLAYERS,
-                                                  invalidParameters);
-        }
-        
-        if (isNegativeNumber(computerizedPlayers)) {
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("amout of computer players is negative number");
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_COMPUTER_PLAYERS);
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.NEGATIVE_NUMBER_OF_COMPUTER_PLAYERS,
-                                                  invalidParameters);
-        }
-        
-        if (isOutOfBounderiesOfTheGamePlayerNumber(humanPlayers, computerizedPlayers)) {
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("amout of players is bigger then "+ Settings.MAX_NUMBER_OF_PLAYERS + "or smaller then" + Settings.MIN_NUMBER_OF_PLAYERS);
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_TOTAL_PLAYER_NUMBER);
-            
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_TOTAL_PLAYER_NUMBER,
-                                                  invalidParameters);
-        }
-    }
-
-    private void checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfGameNotExsists(String gameName) throws GameDoesNotExists_Exception {
-        
-        if(isEmptyStringOrNullOrContainsStartingWhiteSpaces(gameName)) {
-            GameDoesNotExists gameDoesNotExsists = new GameDoesNotExists();
-            RummikubFault rummikubFualt = new RummikubFault();
-
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("game name is empty or null or contains starting white spaces");
-            gameDoesNotExsists.setFaultInfo(rummikubFualt);
-            gameDoesNotExsists.setMessage(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES);
-            throw new GameDoesNotExists_Exception(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES,
-                                                  gameDoesNotExsists);
-        }
-    }
-
-    private void checkCaseOfEmptyStringOrNullOrContainsWhiteSpacesOfInvalidParameters(String gameName) throws InvalidParameters_Exception {
-        
-        if(isEmptyStringOrNullOrContainsStartingWhiteSpaces(gameName)) {
-            InvalidParameters invalidParameters = new InvalidParameters();
-            RummikubFault rummikubFualt = new RummikubFault();
-
-            rummikubFualt.setFaultCode(null);
-            rummikubFualt.setFaultString("player name is empty or null or contains starting white spaces");
-            invalidParameters.setFaultInfo(rummikubFualt);
-            invalidParameters.setMessage(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES);
-            throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.STRING_IS_NULL_OR_EMPTY_OR_CONTAINS_STARTING_WHITE_SPACES,
-                                                  invalidParameters);
-        }
-    }
-    
     
     private boolean isNegativeNumber(int num) {
         return num < 0;
-    }
-
-    private boolean isOutOfBounderiesOfTheGamePlayerNumber(int humanPlayers, int computerizedPlayers) {
-        int totalNumberOfPlayers = humanPlayers + computerizedPlayers;
-        
-        return totalNumberOfPlayers > Settings.MAX_NUMBER_OF_PLAYERS || totalNumberOfPlayers < Settings.MIN_NUMBER_OF_PLAYERS;
-    }
-
-    private boolean isEmptyStringOrNullOrContainsStartingWhiteSpaces(String stringToCheck) {
-       return !(stringToCheck != null && !stringToCheck.isEmpty() && !Character.isWhitespace(stringToCheck.charAt(0)));
     }
     
     private void checkCaseOfIlegalTileListThatRepresentsSeries(List<ws.rummikub.Tile>  tiles) throws InvalidParameters_Exception {
@@ -844,16 +856,6 @@ public class RummikubSingleGameWsImp {
                 invalidParameters.setMessage(Utils.Constants.ErrorMessages.ILEGAL_CANT_TUCH_BOARD_IN_FIRST_MOVE);
                 throw new InvalidParameters_Exception(Utils.Constants.ErrorMessages.ILEGAL_CANT_TUCH_BOARD_IN_FIRST_MOVE,
                                                   invalidParameters);
-            }
-        }
-    }
-
-    private void ImplementCompuerPlayerTurn(SingleMove singleMove) {
-        if (singleMove != null) {
-            try {
-                dealWithSingleMoveResualt(singleMove);
-            } catch (Exception ex) {
-                currentPlayerMove.setIsTurnSkipped(PlayersMove.USER_WANT_SKIP_TRUN);
             }
         }
     }
@@ -944,7 +946,6 @@ public class RummikubSingleGameWsImp {
         }
     }
     
-
     // <editor-fold defaultstate="collapsed" desc="PlayerDetails-WS - methods">
     //************************ maybe not need  - START ************************//
 
@@ -1231,19 +1232,6 @@ public class RummikubSingleGameWsImp {
         }
     }
     
-    private void initGameComponetsToPrepareForNextGame() {
-
-        this.rummikubLogic = null;
-        this.serieGenerator = new SeriesGenerator();
-        this.newMoveGenerator = new ComputerSingleMoveGenerator();
-
-        this.playerDetailes.clear();
-        this.gameStatus = GameStatus.WAITING;
-        this.isLoadedFromXML = !LOADED_FROM_XML;
-        this.timer = new Timer(DEAMON_THREAD);
-        this.eventManager.clearAllEvents();
-    }
-
     private boolean isPositionAtStartOrEndOfSeries(int sequencePosition, final int START_OF_THE_SERIES, final int END_OF_THE_SERIES) {
         return sequencePosition == START_OF_THE_SERIES || sequencePosition == END_OF_THE_SERIES;
     }
