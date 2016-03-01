@@ -340,7 +340,8 @@ public class RummikubSingleGameWsImp {
             this.eventManager.addTakeBackTileEvent(playerId, sequenceIndex, sequencePosition);
         }
     }
-
+    
+    // <editor-fold defaultstate="collapsed" desc="CURRENT version of moveTile method - version with ONE tile in list of sequence created event">
     public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
                          int targetSequencePosition) throws InvalidParameters_Exception {
 
@@ -388,8 +389,56 @@ public class RummikubSingleGameWsImp {
             }
         }
     }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="TEST version of moveTile method - version with empty list of sequence created event">
+//    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
+//                         int targetSequencePosition) throws InvalidParameters_Exception {
+//
+//        validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
+//        
+//        setTimerForPlayerResponse(playerId);
+//        Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(targetSequenceIndex);
+//        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
+//        moveTileFromBoardToBoard(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex,
+//                                 targetSequencePosition, ADD_EVENT);
+//
+//        if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
+//            try {
+//                //split case
+//                ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
+////                Tile logicTile = serie.getSpecificTile(targetSequencePosition);
+////                tileList.add(convertLogicTileToWsTile(logicTile));
+////                boolean isAlreadyAdded = false;
+//                //int targetSequencePositionInNewSeries = 1;
+//                int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
+//                        0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
+//
+//                int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
+//                
+//                this.eventManager.addCreateSequenceEvent(playerId, tileList);
+//                
+//                for (int i = 0 ; i < numOfIterations; i++) {
+//                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition,
+//                                             indexLastSerie, i, ADD_EVENT);
+//                }
+//                
+////                for (int i = 0 ; i < numOfIterations; i++) {
+////                    if (!isAlreadyAdded) {
+////                        this.eventManager.addCreateSequenceEvent(playerId, tileList);
+////                        isAlreadyAdded = true;
+////                    }
+////                    moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i,ADD_EVENT);
+////                }
+//
+//            } catch (Exception ex) {
+//                revertTheTurn(playerId);
+//            }
+//        }
+//    }
+    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method 2">
+    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method - bugged version used in Ex3">
 //    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
 //                         int targetSequencePosition) throws InvalidParameters_Exception {
 //
@@ -422,44 +471,6 @@ public class RummikubSingleGameWsImp {
 //                }
 //            } catch (Exception ex) {
 //                revertTheTurn(playerId);
-//            }
-//        }
-//    }
-    // </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="Old version of moveTile method 1">
-    //    public void moveTile(int playerId, int sourceSequenceIndex, 
-//                         int sourceSequencePosition, int targetSequenceIndex, 
-//                         int targetSequencePosition) throws InvalidParameters_Exception {
-//
-//        //TODO - finish writing that method
-//        validateParamsAndThrowExceptionInIlegalCase(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
-//        
-//        setTimerForPlayerResponse(playerId);
-//    
-//        moveTileFromBoardToBoard(playerId, sourceSequenceIndex, sourceSequencePosition, targetSequenceIndex, targetSequencePosition);
-//
-//        Serie serie = this.currentPlayerMove.getBoardAfterMove().getSeries(targetSequenceIndex);
-//        final int END_OF_THE_SERIES = serie.isEmptySeries()? 0 : serie.getSizeOfSerie();
-//
-//        if (!isPositionAtStartOrEndOfSeries(targetSequencePosition, START_OF_THE_SERIES, END_OF_THE_SERIES)) {
-//            //split case
-//            ArrayList<ws.rummikub.Tile> tileList = new ArrayList<>();
-//            Tile logicTile = serie.getSpecificTile(targetSequencePosition);
-//            tileList.add(convertLogicTileToWsTile(logicTile));
-//            boolean isAlreadyAdded = false;
-//            int targetSequencePositionInNewSeries = 1;
-//            int indexLastSerie = this.currentPlayerMove.getBoardAfterMove().isEmpty()? 
-//                    0 : this.currentPlayerMove.getBoardAfterMove().boardSize();
-//
-//            int numOfIterations = serie.getSizeOfSerie() - targetSequencePosition;
-//
-//            for (int i = targetSequencePositionInNewSeries ; i < numOfIterations; i++) {
-//                if (!isAlreadyAdded) {
-//                    this.eventManager.addCreateSequenceEvent(playerId, tileList);
-//                    isAlreadyAdded = true;
-//                }
-//                moveTileFromBoardToBoard(playerId, targetSequenceIndex, targetSequencePosition, indexLastSerie, i);
 //            }
 //        }
 //    }
