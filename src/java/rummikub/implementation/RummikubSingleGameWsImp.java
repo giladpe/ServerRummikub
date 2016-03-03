@@ -82,7 +82,7 @@ public class RummikubSingleGameWsImp {
     //********** Public functions used by the Web Service - START **********/
 
     //DONE - maybe still things to add if i understood wrong the instructions - releated to TIMER
-    public List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
+    public synchronized List<Event> getEvents(int playerId, int eventId) throws InvalidParameters_Exception {
        
         validateParamsAndThrowExceptionInIlegalCase(playerId, eventId);
         
@@ -338,7 +338,6 @@ public class RummikubSingleGameWsImp {
         }
     }
     
-    // <editor-fold defaultstate="collapsed" desc="CURRENT version of moveTile method - version with empty list of sequence created event">
     public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 
                          int targetSequencePosition) throws InvalidParameters_Exception {
 
@@ -370,7 +369,6 @@ public class RummikubSingleGameWsImp {
             }
         }
     }
-    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="old version of moveTile method (before Liron's answer) - version with ONE tile in list of sequence created event">
 //    public void moveTile(int playerId, int sourceSequenceIndex, int sourceSequencePosition, int targetSequenceIndex, 

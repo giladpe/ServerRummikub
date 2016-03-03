@@ -162,6 +162,28 @@ public class Serie {
 
         return sum;
     }
+    
+    //no need
+//    private SerieType checkTypeOfSerie() {
+//        SerieType serieType;
+//        boolean allTilesAreSameType = true;
+//        final Tile.TileNumber firstTileIntVal = this.serieOfTiles.get(INDEX_MOST_LEFT_IN_SERIES)
+//                                                        .getEnumTileNumber();
+//        
+//        for (Tile currTile : serieOfTiles) {
+//            allTilesAreSameType = firstTileIntVal == currTile.getEnumTileNumber() && allTilesAreSameType;
+//        }
+//        
+//        if(allTilesAreSameType) {
+//            serieType = SerieType.SAME_TYPE_SERIES;
+//        }
+//        else {
+//            serieType = SerieType.INCREASING_SERIES;
+//        }
+//        
+//        return serieType;
+//    }
+
 
     //get the score of increasing serie
     private int sumIncreasingSeriePoints() {
@@ -432,7 +454,8 @@ public class Serie {
 
     public int getScoreOfSerie() {
         int sum = 0;
-
+        //this.typeOfTheSerie = checkTypeOfSerie();
+        
         switch (this.typeOfTheSerie) {
             case INCREASING_SERIES:
                 sum = sumIncreasingSeriePoints();
@@ -448,6 +471,7 @@ public class Serie {
 
         return sum;
     }
+    
 
     public boolean contains(Tile nextTile) {
         return this.serieOfTiles.contains(nextTile);

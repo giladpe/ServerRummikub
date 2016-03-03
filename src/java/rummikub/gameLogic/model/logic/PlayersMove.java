@@ -361,8 +361,19 @@ public class PlayersMove {
     public boolean has30PointsSeriesMove() {
         boolean has30Points;
         int sum = 0;
+        int index = this.indexPlayerUsedForFirstMove.isEmpty()? 0 : this.indexPlayerUsedForFirstMove.get(0);
         
-        sum = this.indexPlayerUsedForFirstMove.stream().map((usedLine) -> this.boardAfterMove.getSeries(usedLine).getScoreOfSerie()).reduce(sum, Integer::sum);
+        for (int i = index ; i < this.boardAfterMove.boardSize() ;i++ ) {
+            Serie currSerie = this.boardAfterMove.getSeries(i);
+            sum += currSerie.getScoreOfSerie();
+        }
+        
+//        for (int i = 0 ; i < this.indexPlayerUsedForFirstMove.size() ;i++ ) {
+//            Serie currSerie = this.boardAfterMove.getSeries(this.indexPlayerUsedForFirstMove.get(i));
+//            sum += currSerie.getScoreOfSerie();
+//        }
+        
+//        sum = this.indexPlayerUsedForFirstMove.stream().map((usedLine) -> this.boardAfterMove.getSeries(usedLine).getScoreOfSerie()).reduce(sum, Integer::sum);
         has30Points = sum >= MIN_SCORE_FOR_STARTING_PLAYING;
         
         return has30Points;
