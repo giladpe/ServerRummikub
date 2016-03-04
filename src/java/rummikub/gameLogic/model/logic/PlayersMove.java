@@ -116,7 +116,6 @@ public class PlayersMove {
                 break;
                 
             case BOARD_TO_BOARD:
-                
             default:
                 result = implementBoardToBoardFirstMove(move);
                 break;

@@ -30,6 +30,10 @@ public class Serie {
     private static final int INDEX_MOST_LEFT_IN_SERIES = 0;
     private static final int LEFT_SERIE_BOUND = 0;
     private static final int RIGHT_SERIE_BOUND = 14;
+    private static final boolean RIGHT = true;
+    private static final boolean LEFT = !RIGHT;
+
+
 
     // Data Members
     private final ArrayList<Tile> serieOfTiles;
@@ -63,7 +67,8 @@ public class Serie {
 
     // Getter && Setter    
     public ArrayList<Tile> getSerieOfTiles() {
-        return serieOfTiles;
+        ArrayList<Tile> serieOfTilesToSend = this.serieOfTiles;
+        return serieOfTilesToSend;
     }
 
     public Tile getSpecificTile(int Index) {
@@ -162,28 +167,6 @@ public class Serie {
 
         return sum;
     }
-    
-    //no need
-//    private SerieType checkTypeOfSerie() {
-//        SerieType serieType;
-//        boolean allTilesAreSameType = true;
-//        final Tile.TileNumber firstTileIntVal = this.serieOfTiles.get(INDEX_MOST_LEFT_IN_SERIES)
-//                                                        .getEnumTileNumber();
-//        
-//        for (Tile currTile : serieOfTiles) {
-//            allTilesAreSameType = firstTileIntVal == currTile.getEnumTileNumber() && allTilesAreSameType;
-//        }
-//        
-//        if(allTilesAreSameType) {
-//            serieType = SerieType.SAME_TYPE_SERIES;
-//        }
-//        else {
-//            serieType = SerieType.INCREASING_SERIES;
-//        }
-//        
-//        return serieType;
-//    }
-
 
     //get the score of increasing serie
     private int sumIncreasingSeriePoints() {
@@ -203,14 +186,14 @@ public class Serie {
 
         return sum;
     }
-
+    
     //cheack if the tiles plced in increasing order
     private boolean cheackIncreasingOrderNextTile(Tile tileToAdd) {
         boolean isValid = true;
-        Tile currTile = this.serieOfTiles.get(INDEX_MOST_LEFT_IN_SERIES);
+        Tile mostLeftTile = this.serieOfTiles.get(INDEX_MOST_LEFT_IN_SERIES);
 
-        if (!(currTile.isJocker() || tileToAdd.isJocker())) {
-            isValid = currTile.isAcendingTiles(tileToAdd);
+        if (!(mostLeftTile.isJocker() || tileToAdd.isJocker())) {
+            isValid = mostLeftTile.isAcendingTiles(tileToAdd);
         }
         return isValid;
     }
@@ -218,20 +201,21 @@ public class Serie {
     //cheacks increasing order with previous tile
     private boolean cheackIncreasingOrderPreviousTile(Tile tileToAdd) {
         boolean isValid = true;
-
         Tile prevTile = this.serieOfTiles.get(this.serieOfTiles.size() - 1);
+
         if (!prevTile.isJocker() && !tileToAdd.isJocker()) {
             isValid = tileToAdd.isAcendingTiles(prevTile);
         }
 
         return isValid;
     }
-
+    
     // cheack increasing order between two tiles
     private boolean cheackIncreasingOrderBetweenTile(Tile tileToAdd, int index) {
         boolean isValid = true;
         Tile prevTile = this.serieOfTiles.get(index - 1);
         Tile nextTile = this.serieOfTiles.get(index);
+        
         if (!tileToAdd.isJocker()) {
             if (!prevTile.isJocker()) {
                 isValid = tileToAdd.isAcendingTiles(prevTile);
@@ -243,6 +227,75 @@ public class Serie {
         }
         return isValid;
     }
+
+//    //cheack if the tiles plced in increasing order
+//    private boolean cheackIncreasingOrderNextTile(Tile tileToAdd) {
+//        boolean isValid = true;
+//        
+//        if (!tileToAdd.isJocker()) {
+//            Tile mostLeftTile = this.serieOfTiles.get(INDEX_MOST_LEFT_IN_SERIES);
+//            mostLeftTile = mostLeftTile.isJocker()? searchForNonJockerTile(RIGHT, LEFT_SERIE_BOUND) : mostLeftTile;
+//            isValid = mostLeftTile.isAcendingTiles(tileToAdd);
+//        }
+//        return isValid;
+//    }
+//
+//    //cheacks increasing order with previous tile
+//    private boolean cheackIncreasingOrderPreviousTile(Tile tileToAdd) {
+//        boolean isValid = true;
+//
+//        if (!tileToAdd.isJocker()) {
+//            Tile mostLeftTile = this.serieOfTiles.get(this.serieOfTiles.size() - 1);
+//            mostLeftTile = mostLeftTile.isJocker()? searchForNonJockerTile(LEFT, this.serieOfTiles.size() - 1) : mostLeftTile;
+//            isValid = mostLeftTile.isAcendingTiles(tileToAdd);
+//        }
+//        return isValid;
+//    }
+//    
+//    // cheack increasing order between two tiles
+//    private boolean cheackIncreasingOrderBetweenTile(Tile tileToAdd, int index) {
+//        boolean isValid = true;
+//        
+//        if (!tileToAdd.isJocker()) {
+//            Tile prevTile = this.serieOfTiles.get(index - 1);
+//            prevTile = prevTile.isJocker()? searchForNonJockerTile(LEFT, index - 1) : prevTile;
+//            isValid = prevTile.isAcendingTiles(tileToAdd);
+//            
+//            if (isValid) {
+//                Tile nextTile = this.serieOfTiles.get(index - 1);
+//                nextTile = nextTile.isJocker()? searchForNonJockerTile(RIGHT, index) : nextTile;
+//                isValid = nextTile.isAcendingTiles(tileToAdd);
+//            }
+//        }
+//        return isValid;
+//    }
+//    
+//    private Tile searchForNonJockerTile(boolean Direction, int startSearchIndex) {
+//        Tile currTile = null, nonJokerTile;
+//        int lastIndex;
+//        int startIndex;
+//        int currIndex;
+//        boolean found = false;
+//        
+//        if (Direction == RIGHT) {
+//            lastIndex = this.serieOfTiles.size();
+//            startIndex = startSearchIndex;
+//        }
+//        else /*(Direction == LEFT)*/ {
+//            lastIndex = 0;
+//            startIndex = startSearchIndex ;
+//        }
+//        
+//        for (int i = startIndex; i < lastIndex && !found; i++) {
+//            currIndex = i < 0 ? i * (-1) : i;
+//            currTile = this.serieOfTiles.get(currIndex);
+//            found = !currTile.isJocker();
+//        }
+//        currTile = currTile == null? this.serieOfTiles.get(startSearchIndex) : currTile;
+//        nonJokerTile = found? currTile : this.serieOfTiles.get(startSearchIndex);
+//        
+//        return nonJokerTile;
+//    }
 
     //skips jockers and give the first tile with number 
     private int findIndexFirstNumberTile() {
@@ -454,7 +507,6 @@ public class Serie {
 
     public int getScoreOfSerie() {
         int sum = 0;
-        //this.typeOfTheSerie = checkTypeOfSerie();
         
         switch (this.typeOfTheSerie) {
             case INCREASING_SERIES:
@@ -472,7 +524,6 @@ public class Serie {
         return sum;
     }
     
-
     public boolean contains(Tile nextTile) {
         return this.serieOfTiles.contains(nextTile);
     }
